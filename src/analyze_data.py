@@ -3,12 +3,13 @@ import pandas as pd
 import plotly.express as px
 import pydeck as pdk
 import streamlit as st
+import json
 
 
 def gpx_data(uploaded_file):
-    
     if uploaded_file is not None:
-        gpx = gpxpy.parse(uploaded_file)
+        gpx_content = uploaded_file.read().decode("utf-8")  # Lies und dekodiere den Inhalt
+        gpx = gpxpy.parse(gpx_content)
         points = []
         for track in gpx.tracks:
             for segment in track.segments:
@@ -31,9 +32,13 @@ def gpx_data(uploaded_file):
     return fig
 
 def gpx_data_pydeck(uploaded_file):
-
+    """ 
+    Eine Funktion, welche die ausgewählte GPX-Datei verarbeitet 
+    und auf einer für Outdooraktivitäten optimierten Karte anzeigt.
+    """
     if uploaded_file is not None:
-        gpx = gpxpy.parse(uploaded_file)
+        gpx_content = uploaded_file.read().decode("utf-8")  # Lies und dekodiere den Inhalt
+        gpx = gpxpy.parse(gpx_content)
         path = []
         for track in gpx.tracks:
             for segment in track.segments:

@@ -2,8 +2,8 @@ import streamlit as st
 import gpxpy
 import plotly.express as px
 import pandas as pd
-
-from src.analyze_data import gpx_data, gpx_data_pydeck
+import json
+from src.analyze_data import gpx_data, gpx_data_pydeck, gpx_to_geojson
 
 if "selected" not in st.session_state:
     st.session_state.selected = "Home"
@@ -23,10 +23,8 @@ st.sidebar.radio(
 
 # Beispiel-Daten
 # GPX-Datei hochladen
+#uploaded_file = st.file_uploader("Bitte GPX-Datei hinzufügen", type="gpx")
 uploaded_file = st.file_uploader("Bitte GPX-Datei hinzufügen", type="gpx")
 fig = gpx_data_pydeck(uploaded_file)
 
-# fig.update_layout(mapbox_style="open-street-map")
-# fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
-# st.plotly_chart(fig)
 
