@@ -1,0 +1,15 @@
+[project]
+name = "Programmieruebung_Abschlussprojekt_SS2025"
+version = "0.1.0"
+description = "Default template for PDM package"
+authors = [
+    {name = "juliusmayr, MaierElias", email = "mj4127@mci4me.at, me7770@mci4me.at"},
+]
+dependencies = []
+requires-python = "==3.13.*"
+readme = "README.md"
+license = {text = "MIT"}
+
+
+[tool.pdm]
+distribution = false
