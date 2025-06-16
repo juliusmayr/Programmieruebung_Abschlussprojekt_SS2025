@@ -52,8 +52,8 @@ def gpx_data_pydeck(uploaded_file):
             initial_view_state=pdk.ViewState(
                 latitude=path[0][1],
                 longitude=path[0][0],
-                zoom=10,
-                pitch=60,
+                zoom=9.9,
+                pitch=0,
             ),
             layers=[
                 pdk.Layer(

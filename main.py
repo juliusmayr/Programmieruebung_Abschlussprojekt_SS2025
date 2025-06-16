@@ -3,7 +3,7 @@ import gpxpy
 import plotly.express as px
 import pandas as pd
 import json
-from src.analyze_data import gpx_data, gpx_data_pydeck, gpx_to_geojson
+from src.analyze_data import gpx_data, gpx_data_pydeck
 
 if "selected" not in st.session_state:
     st.session_state.selected = "Home"
@@ -21,10 +21,7 @@ st.sidebar.radio(
     key="selected"
 )
 
-# Beispiel-Daten
-# GPX-Datei hochladen
-#uploaded_file = st.file_uploader("Bitte GPX-Datei hinzufügen", type="gpx")
-uploaded_file = st.file_uploader("Bitte GPX-Datei hinzufügen", type="gpx")
-fig = gpx_data_pydeck(uploaded_file)
+uploaded_file = st.file_uploader("Lade eine GPX-Datei hoch", type=["gpx"])
+gpx_data_pydeck(uploaded_file)
 
 
