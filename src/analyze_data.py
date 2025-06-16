@@ -1,7 +1,8 @@
 import gpxpy
 import pandas as pd
 import plotly.express as px
-
+import pydeck as pdk
+import streamlit as st
 def gpx_data(uploaded_file):
     
     if uploaded_file is not None:
@@ -26,3 +27,40 @@ def gpx_data(uploaded_file):
                 height=500
             )
     return fig
+
+def gpx_data_pydeck(uploaded_file):
+    if uploaded_file is not None:
+        gpx = gpxpy.parse(uploaded_file)
+        path = []
+    for track in gpx.tracks:
+        for segment in track.segments:
+            for point in segment.points:
+                path.append([point.longitude, point.latitude, point.elevation or 0])
+
+    if path:
+        df = pd.DataFrame([{"path": path}])
+        st.pydeck_chart(pdk.Deck(
+            map_style="mapbox://styles/mapbox/outdoors-v11",
+            initial_view_state=pdk.ViewState(
+                latitude=path[0][1],
+                longitude=path[0][0],
+                zoom=12,
+                pitch=60,
+            ),
+            layers=[
+                pdk.Layer(
+                    "PathLayer",
+                    data=df,
+                    get_path="path",
+                    get_color=[255, 0, 0],
+                    width_scale=20,
+                    width_min_pixels=2,
+                    get_width=5,
+                    elevation_scale=10,
+                    pickable=True,
+                ),
+            ],
+        ))
+    else:
+        st.warning("Keine GPS-Punkte in der GPX-Datei gefunden.")
+    return st.pydeck_chart
