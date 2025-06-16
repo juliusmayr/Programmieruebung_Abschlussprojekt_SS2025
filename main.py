@@ -11,16 +11,6 @@ if "selected" not in st.session_state:
 st.title("Das ist unsere erste App")
 st.write("## Hier ist der Inhalt der App")
 
-
-
-# Beispiel-Daten
-# GPX-Datei hochladen
-uploaded_file = st.file_uploader("Bitte GPX-Datei hinzufügen", type="gpx")
-fig = gpx_data(uploaded_file)
-fig.update_layout(mapbox_style="open-street-map")
-fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
-st.plotly_chart(fig)
-
 # Sidebar
 st.sidebar.title("Navigation")
 
@@ -30,3 +20,12 @@ st.sidebar.radio(
     ["Home", "Analyse", "Visualisierung"],
     key="selected"
 )
+
+# Beispiel-Daten
+# GPX-Datei hochladen
+uploaded_file = st.file_uploader("Bitte GPX-Datei hinzufügen", type="gpx")
+fig = gpx_data(uploaded_file)
+fig.update_layout(mapbox_style="open-street-map")
+fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
+st.plotly_chart(fig)
+
