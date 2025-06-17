@@ -1,30 +1,34 @@
 import json
 import pandas as pd
-import plotly.express as px
+import plotly.graph_objects as go
+import neurokit2 as nk
+import numpy as np
 
 from src.classes.person import Person
 
 class EKGdata:
     """
-    Diese Klasse liest EKG-Daten aus einer CSV-Datei ein und bietet Funktionen zur Analyse der Daten.
-    Sie kann Peaks im EKG-Signal finden, die Herzfrequenz schätzen und die Daten visualisieren.
-    Die EKG-Daten werden in einem DataFrame gespeichert, der die Messwerte in mV und die Zeit in ms enthält.
-    Die Klasse kann auch EKG-Tests anhand einer ID laden.
+    This class reads ECG data from a CSV file and provides functions for data analysis.
+    It can detect peaks in the ECG signal, estimate heart rate, and visualize the data.
+    The ECG data is stored in a DataFrame containing the measurements in mV and the time in ms.
+    The class can also load ECG tests using an ID.
     """
 ## Konstruktor der Klasse soll die Daten einlesen
 
     def __init__(self, ekg_dict):
-        #pass
         self.id = ekg_dict["id"]
         self.date = ekg_dict["date"]
         self.data = ekg_dict["result_link"]
         self.df = pd.read_csv(self.data, sep='\t', header=None, names=['Messwerte in mV','Zeit in ms',])
-        self.df = self.df.iloc[:5000]  # Entferne die erste Zeile, da sie nur die Spaltennamen enthält
-
+        self.df = self.df.iloc[:5000] # Begrenze die Daten auf die ersten 5000 Zeilen für die Analyse
+        self.df_to_numpy = self.df["Messwerte in mV"].to_numpy()  # Konvertiere die Messwerte in mV zu einem Numpy-Array
+        #self.ecg_filtered = nk.signal_filter(self.df_to_numpy, lowcut=0.5, highcut=40, sampling_rate=100)
+        self.signals, self.info = nk.ecg_process(self.df_to_numpy, sampling_rate=850) # Verarbeite die EKG-Daten mit NeuroKit2
+    
     @staticmethod
     def load_by_id(input_persons, test_id):
         """
-        Diese Funktion lädt den EKG-Test anhand der ID und der Personen-Datenbank.
+        This function loads the ECG test using the ID and the person database.
         """
         input_persons = Person.load_person_data()
         for person in input_persons:
@@ -32,54 +36,79 @@ class EKGdata:
                 if ekg_test["id"] == test_id:
                     return ekg_test
     
-    def find_peaks(self, threshold=340):
+    def find_peaks(self):
         """
-        a function that finds R-peaks in an EKG signal.
+        a function that finds R-peaks and T-peaks in an EKG signal.
         """
+        # R-Peaks extrahieren
+        r_peaks = self.info["ECG_R_Peaks"]
 
-        list_of_peaks = []	
+        # T-Peaks extrahieren
+        t_peaks = self.info["ECG_T_Peaks"]
 
-        for index, row in self.df.iterrows():   
-            if index == self.df.index.max():
-                break 
+        return r_peaks, t_peaks
 
-            current_value = row['Messwerte in mV']
-
-            # ist der current_value größer als der Vorgänger und Nachfolger
-            if current_value > self.df.iloc[index-1]["Messwerte in mV"] and current_value >= self.df.iloc[index+1]["Messwerte in mV"]:
-                #print("Found a peak at index: ", index)
-                if current_value > threshold:
-                    list_of_peaks.append(index)
-        return list_of_peaks
-
-    def plot_time_series(self, threshold=340):
-
-        # Erstellte einen Line Plot, der ersten 2000 Werte mit der Zeit aus der x-Achse
-        list_of_peaks = self.find_peaks(threshold)
-        self.df["is_peak"] = False
-        self.df.loc[list_of_peaks, "is_peak"] = True
-
-        self.fig = px.line(self.df.head(5000), x="Zeit in ms", y="Messwerte in mV", title='EKG Data with Peaks Highlighted')
-        self.fig.add_scatter(x= self.df.iloc[self.find_peaks(threshold)]['Zeit in ms'], 
-                    y=self.df.loc[self.df["is_peak"], 'Messwerte in mV'], 
-                    mode='markers', 
-                    marker=dict(color='red', size=5), 
-                    name='Peaks')
-        return self.fig 
-
-    def estimate_heart_rate(self, threshold=340):
+    def plot_time_series(self):
         """
-        Diese Funktion schätzt die Herzfrequenz basierend auf den gefundenen Peaks.
+        This function creates a time series visualization of the ECG signal with R- and T-peaks.
+        It uses Plotly to visualize the ECG data.
         """
-        list_of_peaks = self.find_peaks(threshold)
-        if len(list_of_peaks) < 2:
-            return None
-        # Berechne die Zeitdifferenz zwischen den Peaks
-        peak_intervals = [self.df.iloc[list_of_peaks[i+1]]['Zeit in ms'] - self.df.iloc[list_of_peaks[i]]['Zeit in ms'] for i in range(len(list_of_peaks)-1)]
-        # Berechne die durchschnittliche Zeitdifferenz
-        average_interval = sum(peak_intervals) / len(peak_intervals)
-        # Berechne die Herzfrequenz in bpm (Beats per Minute)
-        heart_rate = 60000 / average_interval if average_interval > 0 else None
+        # R- und T-Peaks extrahieren und bereinigen
+        r_peaks = np.array(self.info["ECG_R_Peaks"])
+        r_peaks = r_peaks[~np.isnan(r_peaks)].astype(int)
+
+        t_peaks = np.array(self.info["ECG_T_Peaks"])
+        t_peaks = t_peaks[~np.isnan(t_peaks)].astype(int)
+
+        self.fig = go.Figure()
+
+        x_part = self.df["Zeit in ms"] / 1000
+        y_part = self.df["Messwerte in mV"]
+        # EKG-Kurve
+        self.fig.add_trace(go.Scatter(
+            x= x_part,  # Zeit in Sekunden
+            y=y_part,
+            mode='lines',
+            name='ECG',
+            line=dict(color='blue'),
+            showlegend=False
+        ))
+
+        # R-Peaks (grün, Marker mit "R")
+        self.fig.add_trace(go.Scatter(
+            x= x_part[r_peaks],
+            y= y_part[r_peaks],
+            mode='text',
+            text=["R"] * len(r_peaks),
+            textfont=dict(color='#006400', size=25),
+            name='R-Peaks',
+            showlegend=False
+        ))
+
+        # T-Peaks (rot, Marker mit "T")
+        self.fig.add_trace(go.Scatter(
+            x=x_part[t_peaks],
+            y=y_part[t_peaks],
+            mode='text',
+            text=["T"] * len(t_peaks),
+            textfont=dict(color='#8B0000', size=25),
+            name='T-Peaks',
+            showlegend=False
+        ))
+
+        self.fig.update_layout(
+            xaxis_title="t / [s]",
+            yaxis_title="ECG / [mV]",
+            template="simple_white"
+        )
+        
+        return self.fig
+
+    def estimate_heart_rate(self, ):
+        """
+        This function estimates the heart rate based on the ECG_Rate signal.
+        """
+        heart_rate = self.signals["ECG_Rate"].mean()  # Durchschnittliche Herzfrequenz in bpm
         return heart_rate
 
 if __name__ == "__main__":

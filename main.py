@@ -1,5 +1,6 @@
 import streamlit as st
 from PIL import Image
+
 from src.classes.person import Person
 from src.classes.ekgdata import EKGdata
 from src.analyze_data import gpx_data, gpx_data_pydeck
@@ -25,6 +26,9 @@ st.image(image, caption=st.session_state.selected_person)
 #Laden des Alters für die augewählte Person 
 person = Person(selected_person_data)
 st.write(f"Alter: {person.calc_age()} Jahre, Geburtsjahr: {person.date_of_birth}")
+
+# Geschlecht der Person anzeigen
+st.write(f"Geschlecht: {person.gender}")
 
 
 # Laden der EKG-Daten für die ausgewählte Person und den ausgewählten Test
