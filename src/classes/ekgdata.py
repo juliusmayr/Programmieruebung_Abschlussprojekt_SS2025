@@ -23,7 +23,7 @@ class EKGdata:
         self.df = self.df.iloc[:5000] # Begrenze die Daten auf die ersten 5000 Zeilen für die Analyse
         self.df_to_numpy = self.df["Messwerte in mV"].to_numpy()  # Konvertiere die Messwerte in mV zu einem Numpy-Array
         #self.ecg_filtered = nk.signal_filter(self.df_to_numpy, lowcut=0.5, highcut=40, sampling_rate=100)
-        self.signals, self.info = nk.ecg_process(self.df_to_numpy, sampling_rate=850) # Verarbeite die EKG-Daten mit NeuroKit2
+        self.signals, self.info = nk.ecg_process(self.df_to_numpy, sampling_rate=700, method = "neurokit") # Verarbeite die EKG-Daten mit NeuroKit2
     
     @staticmethod
     def load_by_id(input_persons, test_id):
@@ -40,13 +40,10 @@ class EKGdata:
         """
         a function that finds R-peaks and T-peaks in an EKG signal.
         """
-        # R-Peaks extrahieren
-        r_peaks = self.info["ECG_R_Peaks"]
+        self.r_peaks = self.info["ECG_R_Peaks"]
+        self.t_peaks = self.info["ECG_T_Peaks"]
 
-        # T-Peaks extrahieren
-        t_peaks = self.info["ECG_T_Peaks"]
-
-        return r_peaks, t_peaks
+        return self.r_peaks, self.t_peaks
 
     def plot_time_series(self):
         """
@@ -54,57 +51,62 @@ class EKGdata:
         It uses Plotly to visualize the ECG data.
         """
         # R- und T-Peaks extrahieren und bereinigen
-        r_peaks = np.array(self.info["ECG_R_Peaks"])
-        r_peaks = r_peaks[~np.isnan(r_peaks)].astype(int)
+        self.r_peaks = self.info["ECG_R_Peaks"]
+        self.r_peaks = np.array(self.r_peaks)  # Konvertiere zu Numpy-Array
+        self.r_peaks = self.r_peaks[~np.isnan(self.r_peaks)].astype(int)
 
-        t_peaks = np.array(self.info["ECG_T_Peaks"])
-        t_peaks = t_peaks[~np.isnan(t_peaks)].astype(int)
-
+        self.t_peaks = self.info["ECG_T_Peaks"]
+        self.t_peaks = np.array(self.t_peaks)
+        self.t_peaks = self.t_peaks[~np.isnan(self.t_peaks)].astype(int)
+        # self.r_peaks, self.t_peaks = self.find_peaks()
+        # self.r_peaks = self.r_peaks[~np.isnan(self.r_peaks)]
+        # self.t_peaks = self.t_peaks[~np.isnan(self.t_peaks)] # R- und T-Peaks finden
         self.fig = go.Figure()
 
         x_part = self.df["Zeit in ms"] / 1000
         y_part = self.df["Messwerte in mV"]
+        
         # EKG-Kurve
         self.fig.add_trace(go.Scatter(
-            x= x_part,  # Zeit in Sekunden
+            x=x_part,  # Zeit in Sekunden
             y=y_part,
             mode='lines',
             name='ECG',
             line=dict(color='blue'),
-            showlegend=False
+            showlegend=True
         ))
 
         # R-Peaks (grün, Marker mit "R")
         self.fig.add_trace(go.Scatter(
-            x= x_part[r_peaks],
-            y= y_part[r_peaks],
+            x= x_part[self.r_peaks],
+            y= y_part[self.r_peaks],
             mode='text',
-            text=["R"] * len(r_peaks),
+            text=["R"] * len(self.r_peaks),
             textfont=dict(color='#006400', size=25),
             name='R-Peaks',
-            showlegend=False
+            showlegend=True
         ))
 
         # T-Peaks (rot, Marker mit "T")
         self.fig.add_trace(go.Scatter(
-            x=x_part[t_peaks],
-            y=y_part[t_peaks],
+            x=x_part[self.t_peaks],
+            y=y_part[self.t_peaks],
             mode='text',
-            text=["T"] * len(t_peaks),
+            text=["T"] * len(self.t_peaks),
             textfont=dict(color='#8B0000', size=25),
             name='T-Peaks',
-            showlegend=False
-        ))
+            showlegend=True))
+        
 
         self.fig.update_layout(
             xaxis_title="t / [s]",
             yaxis_title="ECG / [mV]",
             template="simple_white"
         )
-        
+
         return self.fig
 
-    def estimate_heart_rate(self, ):
+    def estimate_heart_rate(self):
         """
         This function estimates the heart rate based on the ECG_Rate signal.
         """

@@ -38,7 +38,8 @@ st.session_state.selected_ekg_test = st.selectbox("Wähle einen EKG-Test", optio
 if st.session_state.selected_ekg_test != "Bitte Wählen Sie einen Test aus":
     ekg_test = EKGdata.load_by_id(person_data, st.session_state.selected_ekg_test)
     ekg_data = EKGdata(ekg_test)
-    ekg_data.plot_time_series()
+    st.write(f"### EKG-Test ID: {ekg_data.id}")
+    ekg_data.fig = ekg_data.plot_time_series()
     st.plotly_chart(ekg_data.fig)
     st.write(f"Testdatum: {ekg_test['date']}")
     #st.write (ekg_data.df.head())
