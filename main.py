@@ -1,7 +1,7 @@
 import streamlit as st
 from PIL import Image
-from classes_elias.person import Person
-from classes_elias.ekgdata import EKGdata
+from src.classes.person import Person
+from src.classes.ekgdata import EKGdata
 from src.analyze_data import gpx_data, gpx_data_pydeck
 from datetime import timedelta
 

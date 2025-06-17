@@ -2,7 +2,7 @@ import json
 import pandas as pd
 import plotly.express as px
 
-from classes_elias.person import Person
+from src.classes.person import Person
 
 class EKGdata:
     """
