@@ -13,7 +13,7 @@ class Person:
 
     @staticmethod
     def load_by_id(person_id):
-        """A Function that knows where te persons ID is returns a Dictionary with the Persons"""
+        """A Function that knows where the persons id is. returns a Dictionary with the Persons"""
         person_data = Person.load_person_data()
         for person in person_data: 
             if person_id == person["id"]:

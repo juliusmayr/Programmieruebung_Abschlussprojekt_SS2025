@@ -2,10 +2,15 @@ import json
 import pandas as pd
 import plotly.express as px
 
-from person import Person
+from classes_elias.person import Person
 
 class EKGdata:
-
+    """
+    Diese Klasse liest EKG-Daten aus einer CSV-Datei ein und bietet Funktionen zur Analyse der Daten.
+    Sie kann Peaks im EKG-Signal finden, die Herzfrequenz schätzen und die Daten visualisieren.
+    Die EKG-Daten werden in einem DataFrame gespeichert, der die Messwerte in mV und die Zeit in ms enthält.
+    Die Klasse kann auch EKG-Tests anhand einer ID laden.
+    """
 ## Konstruktor der Klasse soll die Daten einlesen
 
     def __init__(self, ekg_dict):
