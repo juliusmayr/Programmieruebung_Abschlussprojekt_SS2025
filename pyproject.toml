@@ -15,4 +15,6 @@ license = {text = "MIT"}
 distribution = false
 
 [tool.pdm.scripts]
+
 streamlit = "python -m streamlit run main_julius.py"
+

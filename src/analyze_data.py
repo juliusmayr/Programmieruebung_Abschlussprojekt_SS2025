@@ -3,8 +3,6 @@ import pandas as pd
 import plotly.express as px
 import pydeck as pdk
 import streamlit as st
-import json
-
 
 def gpx_data(uploaded_file):
     if uploaded_file is not None:
@@ -34,7 +32,7 @@ def gpx_data(uploaded_file):
 def gpx_data_pydeck(uploaded_file):
     """ 
     Eine Funktion, welche die ausgewählte GPX-Datei verarbeitet 
-    und auf einer für Outdooraktivitäten optimierten Karte anzeigt.
+    und auf einer für Outdooraktivitäten optimierten Karte anzeigt, die in einer 3D-Version verfügbar ist.
     """
     if uploaded_file is not None:
         gpx_content = uploaded_file.read().decode("utf-8")  # Lies und dekodiere den Inhalt
