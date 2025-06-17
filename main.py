@@ -24,7 +24,7 @@ st.image(image, caption=st.session_state.selected_person)
 
 #Laden des Alters für die augewählte Person 
 person = Person(selected_person_data)
-st.write(f"Alter: {person.calc_age()} Jahre")
+st.write(f"Alter: {person.calc_age()} Jahre, Geburtsjahr: {person.date_of_birth}")
 
 
 # Laden der EKG-Daten für die ausgewählte Person und den ausgewählten Test
@@ -42,8 +42,11 @@ if st.session_state.selected_ekg_test != "Bitte Wählen Sie einen Test aus":
     td = timedelta(minutes= minutes)  # Konvertiere ms zu Minuten
     st.write(f"Testdauer: {td} Minuten")
 
+st.write("## Kartendarstellung der GPX-Daten")
 
-uploaded_file = st.file_uploader("Lade eine GPX-Datei hoch", type=["gpx"])
-gpx_data_pydeck(uploaded_file)
-
+try:
+    uploaded_file = st.file_uploader("Lade eine GPX-Datei hoch", type=["gpx"])
+    gpx_data_pydeck(uploaded_file)
+except:
+    st.write("Bitte laden Sie eine GPX-Datei hoch, um die Karte anzuzeigen.")
 
