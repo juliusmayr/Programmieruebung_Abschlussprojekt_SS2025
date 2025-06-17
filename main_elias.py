@@ -15,8 +15,6 @@ st.write("## Hier ist der Inhalt der App")
 uploaded_file = st.file_uploader("Lade eine GPX-Datei hoch", type=["gpx"])
 gpx_data_pydeck(uploaded_file)
 
-person_dict = Person.load_person_data()
-
 person_data = Person.load_person_data()
 list_of_persons = Person.get_person_list(person_data)
 st.session_state.selected_person = st.selectbox("Wähle eine Versuchsperson", options=list_of_persons)
