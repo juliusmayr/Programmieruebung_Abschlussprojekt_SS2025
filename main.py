@@ -1,9 +1,10 @@
 import streamlit as st
-import gpxpy
+
 import plotly.express as px
 import pandas as pd
 import json
 from src.analyze_data import gpx_data, gpx_data_pydeck
+import time
 
 if "selected" not in st.session_state:
     st.session_state.selected = "Home"
