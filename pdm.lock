@@ -5,7 +5,7 @@
 groups = ["default"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:93c0990f509e8202c224265faff8bcb2ff41dedd43dec4989e4dde1906f5ea97"
+content_hash = "sha256:39ff6f04417ac1827dbeeea4af67549683e3ddcc3e771a4d1bc10912108bf55f"
 
 [[metadata.targets]]
 requires_python = "==3.13.*"
@@ -1978,18 +1978,18 @@ files = [
 
 [[package]]
 name = "streamlit"
-version = "1.46.0"
+version = "1.45.1"
 requires_python = "!=3.9.7,>=3.9"
 summary = "A faster way to build and share data apps"
 groups = ["default"]
 dependencies = [
     "altair<6,>=4.0",
     "blinker<2,>=1.5.0",
-    "cachetools<7,>=4.0",
+    "cachetools<6,>=4.0",
     "click<9,>=7.0",
     "gitpython!=3.1.19,<4,>=3.0.7",
     "numpy<3,>=1.23",
-    "packaging<26,>=20",
+    "packaging<25,>=20",
     "pandas<3,>=1.4.0",
     "pillow<12,>=7.1.0",
     "protobuf<7,>=3.20",
@@ -1998,13 +1998,13 @@ dependencies = [
     "requests<3,>=2.27",
     "tenacity<10,>=8.1.0",
     "toml<2,>=0.10.1",
-    "tornado!=6.5.0,<7,>=6.0.3",
+    "tornado<7,>=6.0.3",
     "typing-extensions<5,>=4.4.0",
     "watchdog<7,>=2.1.5; platform_system != \"Darwin\"",
 ]
 files = [
-    {file = "streamlit-1.46.0-py3-none-any.whl", hash = "sha256:f8624acabafcf18611a0fac2635cf181a7ba922b45bd131ae15fc8f80e1a5482"},
-    {file = "streamlit-1.46.0.tar.gz", hash = "sha256:0b2734b48f11f1e5c8046011b6b1a2274982dc657eef2ade8db70f0e1dc53dda"},
+    {file = "streamlit-1.45.1-py3-none-any.whl", hash = "sha256:9ab6951585e9444672dd650850f81767b01bba5d87c8dac9bc2e1c859d6cc254"},
+    {file = "streamlit-1.45.1.tar.gz", hash = "sha256:e37d56c0af5240dbc240976880e81366689c290a559376417246f9b3f51b4217"},
 ]
 
 [[package]]

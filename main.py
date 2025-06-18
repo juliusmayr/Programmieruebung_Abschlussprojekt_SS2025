@@ -57,4 +57,8 @@ st.write("## Kartendarstellung der GPX-Daten")
 
 
 uploaded_file = st.file_uploader("Lade eine GPX-Datei hoch", type=["gpx"])
-gpx_data_pydeck(uploaded_file)
+
+try:
+    gpx_data_pydeck(uploaded_file)
+except:
+    st.write("Bitte laden Sie eine GPX-Datei hoch, um die Kartendarstellung zu sehen.")
