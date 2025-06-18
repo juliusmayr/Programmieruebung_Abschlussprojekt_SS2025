@@ -35,7 +35,7 @@ class EKGdata:
             for ekg_test in person["ekg_tests"]:
                 if ekg_test["id"] == test_id:
                     return ekg_test
-    
+                
     def find_peaks(self):
         """
         a function that finds R-peaks and T-peaks in an EKG signal.

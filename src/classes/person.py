@@ -21,7 +21,7 @@ class Person:
         person_data = Person.load_person_data()
         for person in person_data: 
             if person_id == person["id"]:
-                return person_data[person_id-1] 
+                return person_data[person_id-1]  # IDs in JSON sind 1-basiert, Python-Listen sind 0-basiert
         return {'None'}
             
     @staticmethod
@@ -65,6 +65,17 @@ class Person:
         self.id = person_dict["id"]
         self.gender = person_dict["gender"]
 
+    def get_ekg_test_list(self):
+        """ 
+        A Function that returns a list of all EKG tests available for the person.
+        """
+        data = Person.load_by_id(self.id)
+        if "ekg_tests" in data:
+            ekg_tests = []
+            for ekg_test in data["ekg_tests"]:
+                ekg_tests.append(ekg_test["id"])
+            return ekg_tests
+    
     def calc_age(self):
         """
         A Function that calculates the age of a person based on the date of birth
@@ -81,50 +92,40 @@ class Person:
         max_heart_rate = 220 - age
         return max_heart_rate
     
-    def edit_person(self, selected_person_data):
+    def edit_person(self, persons_data):
         """
         A Function that edits person json file.
         """
-        self.person = selected_person_data
-
+        st.write("Personendaten bearbeiten")
         with st.form("person_form"):
-            self.id = st.text_input("ID", value=selected_person_data["id"], disabled=True)
-            self.firstname = st.text_input("Vorname", value=self.person["firstname"])
-            submitted = st.form_submit_button("Speichern", disabled=True)
-            self.lastname = st.text_input("Nachname", value=self.person["lastname"])
-            submitted = st.form_submit_button("Speichern", disabled=True)
-            self.date_of_birth = st.date_input("Geburtsjahr", value=self.person["date_of_birth"])
-            #st.write("Geburtsdatum (TT.MM.JJJJ)", self.date_of_birth.strftime("%d.%m.%Y"))
-            self.gender = st.selectbox("Geschlecht", value=self.person["gender"], options=["male", "female", "diverse"])
-            submitted = st.form_submit_button("Speichern", disabled=False)
-            #st.form_submit_button("Speichern")
-        
-        if submitted:
-            self.person.firstname = self.firstname
-            self.person.lastname = self.lastname
-            self.person.date_of_birth = self.date_of_birth.strftime("%d.%m.%Y")
-            self.person.gender = self.gender
-            st.success("Personendaten aktualisiert!")
-        # speichern der Personendaten in der JSON-Datei
-        # with open("data/person_db.json", "r") as file:
-        #     person_data = json.load(file)
-        
-        self.person_data.update({
-            "id": self.id,
-            "date_of_birth": self.person.date_of_birth,
-            "firstname": self.person.firstname,
-            "lastname": self.person.lastname,
-            "gender": self.person.gender,
-            "picture_path": self.person.picture_path,
-            "ekg_tests": self.person.ekg_tests
-        })
-        save_path = "data/person_db.json"
-        # Speichern der aktualisierten Daten in der JSON-Datei
-        with open(save_path, "w") as file:
-            json.dump(self.person_data, file, indent=4)
-        
-        
+            self.id = int(st.text_input("ID", value=str(self.id), disabled=True))
+            self.firstname = st.text_input("Vorname", value=self.firstname)
+            self.lastname = st.text_input("Nachname", value=self.lastname)
+            self.date_of_birth = st.number_input("Geburtsjahr", value=int(self.date_of_birth), min_value=1900, max_value=date.today().year, step=1)
+            self.gender = st.selectbox("Geschlecht", options=["male", "female", "diverse"], index=["male", "female", "diverse"].index(self.gender))
+            submitted = st.form_submit_button("Speichern")
 
+        if submitted:
+            st.write("Formular abgeschickt!")
+            for person in persons_data:
+                
+                if str(person["id"]) == str(self.id):
+                    
+                    person["id"] = self.id
+                    person["date_of_birth"] = self.date_of_birth
+                    person["firstname"] = self.firstname
+                    person["lastname"] = self.lastname
+                    person["gender"] = self.gender
+                    person["picture_path"] = self.picture_path
+                    #person["ekg_tests"] = self.ekg_tests
+                    break
+            save_path = "data/person_db.json"
+        
+            with open(save_path, "w") as file:
+                json.dump(persons_data, file, indent=4)
+            st.success("Personendaten aktualisiert!")
+
+        
 
 if __name__ == "__main__":
     print("This is a module with some functions to read the person data")

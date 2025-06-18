@@ -15,8 +15,8 @@ st.title("Das ist unsere erste App")
 st.write("## Hier ist der Inhalt der App")
 
 # Personen laden
-person_data = Person.load_person_data()
-list_of_persons = Person.get_person_list(person_data)
+persons_data = Person.load_person_data()
+list_of_persons = Person.get_person_list(persons_data)
 
 st.session_state.selected_person = st.selectbox("Person auswählen", options = list_of_persons)
 #Laden eines Bildes 
@@ -35,14 +35,15 @@ st.write(f"Geschlecht: {person.gender}")
 
 # Laden der EKG-Daten für die ausgewählte Person und den ausgewählten Test
 
-# edit_mode = st.checkbox("Personendaten bearbeiten")
-# if edit_mode:
-#     person.edit_person(selected_person_data)
+edit_mode = st.checkbox("Personendaten bearbeiten")
+
+if edit_mode:
+    person.edit_person(persons_data)
 
 selected_person = st.session_state.selected_person
-st.session_state.selected_ekg_test = st.selectbox("Wähle einen EKG-Test", options=["Bitte Wählen Sie einen Test aus"] + [ekg_test["id"] for ekg_test in person_data[Person.find_person_data_by_name(selected_person)["id"]-1]["ekg_tests"]])
+st.session_state.selected_ekg_test = st.selectbox("EKG-Test auswählen", options=["Bitte Wählen Sie einen Test aus"] + person.get_ekg_test_list())
 if st.session_state.selected_ekg_test != "Bitte Wählen Sie einen Test aus":
-    ekg_test = EKGdata.load_by_id(person_data, st.session_state.selected_ekg_test)
+    ekg_test = EKGdata.load_by_id(persons_data, st.session_state.selected_ekg_test)
     ekg_data = EKGdata(ekg_test)
     st.write(f"### EKG-Test ID: {ekg_data.id}")
     ekg_data.fig = ekg_data.plot_time_series()
