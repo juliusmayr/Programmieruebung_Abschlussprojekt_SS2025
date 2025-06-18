@@ -4,7 +4,9 @@ from PIL import Image
 from src.classes.person import Person
 from src.classes.ekgdata import EKGdata
 from src.analyze_data import gpx_data, gpx_data_pydeck
+import os
 from datetime import timedelta
+from streamlit.components.v1 import html
 
 if "selected" not in st.session_state:
     st.session_state.selected = "Home"
@@ -33,6 +35,10 @@ st.write(f"Geschlecht: {person.gender}")
 
 # Laden der EKG-Daten für die ausgewählte Person und den ausgewählten Test
 
+# edit_mode = st.checkbox("Personendaten bearbeiten")
+# if edit_mode:
+#     person.edit_person(selected_person_data)
+
 selected_person = st.session_state.selected_person
 st.session_state.selected_ekg_test = st.selectbox("Wähle einen EKG-Test", options=["Bitte Wählen Sie einen Test aus"] + [ekg_test["id"] for ekg_test in person_data[Person.find_person_data_by_name(selected_person)["id"]-1]["ekg_tests"]])
 if st.session_state.selected_ekg_test != "Bitte Wählen Sie einen Test aus":
@@ -49,9 +55,6 @@ if st.session_state.selected_ekg_test != "Bitte Wählen Sie einen Test aus":
 
 st.write("## Kartendarstellung der GPX-Daten")
 
-try:
-    uploaded_file = st.file_uploader("Lade eine GPX-Datei hoch", type=["gpx"])
-    gpx_data_pydeck(uploaded_file)
-except:
-    st.write("Bitte laden Sie eine GPX-Datei hoch, um die Karte anzuzeigen.")
 
+uploaded_file = st.file_uploader("Lade eine GPX-Datei hoch", type=["gpx"])
+gpx_data_pydeck(uploaded_file)

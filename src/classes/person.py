@@ -1,11 +1,12 @@
 import json
-from datetime import datetime, date
+from datetime import date
+import streamlit as st
 
 class Person:
     
     @staticmethod
     def load_person_data():
-        """A Function that knows where te person Database is and returns a Dictionary with the Persons"""
+        """A Function that knows where the person Database is and returns a Dictionary with the Persons"""
         file = open("data/person_db.json")
         person_data = json.load(file)
         return person_data
@@ -13,7 +14,10 @@ class Person:
 
     @staticmethod
     def load_by_id(person_id):
-        """A Function that knows where the persons id is. returns a Dictionary with the Persons"""
+        """
+        A Function that knows where the persons id is.
+        Returns a Dictionary with the Persons.
+        """
         person_data = Person.load_person_data()
         for person in person_data: 
             if person_id == person["id"]:
@@ -62,18 +66,65 @@ class Person:
         self.gender = person_dict["gender"]
 
     def calc_age(self):
-        """A Function that calculates the age of a person based on the date of birth"""
-        #date_of_birth = datetime.strptime(self.date_of_birth, "%Y-%m-%d").date()
+        """
+        A Function that calculates the age of a person based on the date of birth
+        """
         today = date.today()
         age = today.year - int(self.date_of_birth)
         return age
 
     def calc_max_heart_rate(self):
-        """A Function that calculates the Persons maximum Heart Rate based on the age"""
+        """
+        A Function that calculates the Persons maximum Heart Rate based on the age.
+        """
         age = self.calc_age()
         max_heart_rate = 220 - age
         return max_heart_rate
+    
+    def edit_person(self, selected_person_data):
+        """
+        A Function that edits person json file.
+        """
+        self.person = selected_person_data
+
+        with st.form("person_form"):
+            self.id = st.text_input("ID", value=selected_person_data["id"], disabled=True)
+            self.firstname = st.text_input("Vorname", value=self.person["firstname"])
+            submitted = st.form_submit_button("Speichern", disabled=True)
+            self.lastname = st.text_input("Nachname", value=self.person["lastname"])
+            submitted = st.form_submit_button("Speichern", disabled=True)
+            self.date_of_birth = st.date_input("Geburtsjahr", value=self.person["date_of_birth"])
+            #st.write("Geburtsdatum (TT.MM.JJJJ)", self.date_of_birth.strftime("%d.%m.%Y"))
+            self.gender = st.selectbox("Geschlecht", value=self.person["gender"], options=["male", "female", "diverse"])
+            submitted = st.form_submit_button("Speichern", disabled=False)
+            #st.form_submit_button("Speichern")
         
+        if submitted:
+            self.person.firstname = self.firstname
+            self.person.lastname = self.lastname
+            self.person.date_of_birth = self.date_of_birth.strftime("%d.%m.%Y")
+            self.person.gender = self.gender
+            st.success("Personendaten aktualisiert!")
+        # speichern der Personendaten in der JSON-Datei
+        # with open("data/person_db.json", "r") as file:
+        #     person_data = json.load(file)
+        
+        self.person_data.update({
+            "id": self.id,
+            "date_of_birth": self.person.date_of_birth,
+            "firstname": self.person.firstname,
+            "lastname": self.person.lastname,
+            "gender": self.person.gender,
+            "picture_path": self.person.picture_path,
+            "ekg_tests": self.person.ekg_tests
+        })
+        save_path = "data/person_db.json"
+        # Speichern der aktualisierten Daten in der JSON-Datei
+        with open(save_path, "w") as file:
+            json.dump(self.person_data, file, indent=4)
+        
+        
+
 
 if __name__ == "__main__":
     print("This is a module with some functions to read the person data")

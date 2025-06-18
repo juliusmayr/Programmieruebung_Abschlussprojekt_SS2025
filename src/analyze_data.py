@@ -3,6 +3,7 @@ import pandas as pd
 import plotly.express as px
 import pydeck as pdk
 import streamlit as st
+import json
 
 def gpx_data(uploaded_file):
     if uploaded_file is not None:
@@ -70,3 +71,4 @@ def gpx_data_pydeck(uploaded_file):
     else:
         st.warning("Keine GPS-Punkte in der GPX-Datei gefunden.")
     return st.pydeck_chart
+

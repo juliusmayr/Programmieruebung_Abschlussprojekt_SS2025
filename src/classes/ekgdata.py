@@ -127,3 +127,4 @@ if __name__ == "__main__":
     test_ekg.plot_time_series().show(renderer="browser")
     # test_ekg.estimate_heart_rate()
     
+d_leafmap = open("data/gpx_files/pillersee.gpx")
