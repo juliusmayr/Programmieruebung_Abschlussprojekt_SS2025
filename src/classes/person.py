@@ -1,6 +1,7 @@
 import json
 from datetime import date
 import streamlit as st
+from PIL import Image
 
 class Person:
     
@@ -103,10 +104,12 @@ class Person:
             self.lastname = st.text_input("Nachname", value=self.lastname)
             self.date_of_birth = st.number_input("Geburtsjahr", value=int(self.date_of_birth), min_value=1900, max_value=date.today().year, step=1)
             self.gender = st.selectbox("Geschlecht", options=["male", "female", "diverse"], index=["male", "female", "diverse"].index(self.gender))
+            picture = st.file_uploader("Bild hochladen", type=["jpg", "jpeg"])
+            img = Image.open(picture) if picture else Image.open(self.picture_path)
+            img.save(self.picture_path, format="JPEG")
             submitted = st.form_submit_button("Speichern")
 
         if submitted:
-            st.write("Formular abgeschickt!")
             for person in persons_data:
                 
                 if str(person["id"]) == str(self.id):
@@ -117,13 +120,14 @@ class Person:
                     person["lastname"] = self.lastname
                     person["gender"] = self.gender
                     person["picture_path"] = self.picture_path
-                    #person["ekg_tests"] = self.ekg_tests
+                    person["ekg_tests"] = person["ekg_tests"]
                     break
             save_path = "data/person_db.json"
         
             with open(save_path, "w") as file:
                 json.dump(persons_data, file, indent=4)
             st.success("Personendaten aktualisiert!")
+            
 
         
 

@@ -35,10 +35,10 @@ st.write(f"Geschlecht: {person.gender}")
 
 # Laden der EKG-Daten für die ausgewählte Person und den ausgewählten Test
 
-edit_mode = st.checkbox("Personendaten bearbeiten")
 
-if edit_mode:
+with st.expander(label = "Bearbeiten", icon = "✏️", expanded = False):
     person.edit_person(persons_data)
+    
 
 selected_person = st.session_state.selected_person
 st.session_state.selected_ekg_test = st.selectbox("EKG-Test auswählen", options=["Bitte Wählen Sie einen Test aus"] + person.get_ekg_test_list())
