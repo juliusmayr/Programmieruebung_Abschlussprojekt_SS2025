@@ -5,7 +5,7 @@ description = "Default template for PDM package"
 authors = [
     {name = "juliusmayr, MaierElias", email = "mj4127@mci4me.at, me7770@mci4me.at"},
 ]
-dependencies = ["streamlit==1.45.1", "numpy>=2.3.0", "pandas>=2.3.0", "jupyter>=1.1.1", "neurokit2>=0.2.11", "plotly>=6.1.2", "matplotlib>=3.10.3", "fitparse>=1.2.0", "gpxpy>=1.6.2", "pydeck>=0.9.1", "PyWavelets>=1.8.0"]
+dependencies = ["streamlit==1.45.1", "numpy>=2.3.0", "pandas>=2.3.0", "jupyter>=1.1.1", "neurokit2>=0.2.11", "plotly>=6.1.2", "matplotlib>=3.10.3", "fitparse>=1.2.0", "gpxpy>=1.6.2", "pydeck>=0.9.1", "PyWavelets>=1.8.0", "orjson>=3.10.18"]
 requires-python = "==3.13.*"
 readme = "README.md"
 license = {text = "MIT"}

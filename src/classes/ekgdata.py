@@ -20,7 +20,7 @@ class EKGdata:
         self.date = ekg_dict["date"]
         self.data = ekg_dict["result_link"]
         self.df = pd.read_csv(self.data, sep='\t', header=None, names=['Messwerte in mV','Zeit in ms',])
-        self.df = self.df.iloc[:5000] # Begrenze die Daten auf die ersten 5000 Zeilen für die Analyse
+        #self.df = self.df.iloc[:5000] # Begrenze die Daten auf die ersten 5000 Zeilen für die Analyse
         self.df_to_numpy = self.df["Messwerte in mV"].to_numpy()  # Konvertiere die Messwerte in mV zu einem Numpy-Array
         #self.ecg_filtered = nk.signal_filter(self.df_to_numpy, lowcut=0.5, highcut=40, sampling_rate=100)
         self.signals, self.info = nk.ecg_process(self.df_to_numpy, sampling_rate=700, method = "neurokit") # Verarbeite die EKG-Daten mit NeuroKit2
@@ -99,9 +99,12 @@ class EKGdata:
         
 
         self.fig.update_layout(
+            width=1000,
+            height=350,
             xaxis_title="t / [s]",
             yaxis_title="ECG / [mV]",
-            template="simple_white"
+            template="simple_white",
+            xaxis_range=[100, 120]
         )
 
         return self.fig
