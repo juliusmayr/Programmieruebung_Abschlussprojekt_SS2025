@@ -42,7 +42,7 @@ def gpx_data_pydeck(uploaded_file):
         for track in gpx.tracks:
             for segment in track.segments:
                 for point in segment.points:
-                    path.append([point.longitude, point.latitude])
+                    path.append([point.longitude, point.latitude, point.elevation])
 
     if path:
         df = pd.DataFrame([{"path": path}])

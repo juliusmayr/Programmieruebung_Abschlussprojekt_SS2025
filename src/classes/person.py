@@ -27,7 +27,7 @@ class Person:
             
     @staticmethod
     def get_person_list(person_data):
-        """A Function that takes the persons-dictionary and returns a list auf all person names"""
+        """A Function that takes the persons-dictionary and returns a list of all person names"""
         list_of_names = []
 
         for eintrag in person_data:

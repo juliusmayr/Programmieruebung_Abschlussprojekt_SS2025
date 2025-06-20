@@ -24,7 +24,7 @@ class EKGdata:
         self.df_to_numpy = self.df["Messwerte in mV"].to_numpy()  # Konvertiere die Messwerte in mV zu einem Numpy-Array
         #self.ecg_filtered = nk.signal_filter(self.df_to_numpy, lowcut=0.5, highcut=40, sampling_rate=100)
         self.signals, self.info = nk.ecg_process(self.df_to_numpy, sampling_rate=700, method = "neurokit") # Verarbeite die EKG-Daten mit NeuroKit2
-    
+
     @staticmethod
     def load_by_id(input_persons, test_id):
         """
@@ -63,8 +63,11 @@ class EKGdata:
         # self.t_peaks = self.t_peaks[~np.isnan(self.t_peaks)] # R- und T-Peaks finden
         self.fig = go.Figure()
 
-        x_part = self.df["Zeit in ms"] / 1000
+        self.df["sequential_index"] = np.arange(len(self.df))
+        x_part = np.arange(len(self.df)) /500  # You'll need to define sampling_rate
         y_part = self.df["Messwerte in mV"]
+        # x_part = (self.df["Zeit in ms"])/1000
+        # y_part = self.df["Messwerte in mV"]
         
         # EKG-Kurve
         self.fig.add_trace(go.Scatter(
@@ -89,8 +92,8 @@ class EKGdata:
 
         # T-Peaks (rot, Marker mit "T")
         self.fig.add_trace(go.Scatter(
-            x=x_part[self.t_peaks],
-            y=y_part[self.t_peaks],
+            x=np.array(x_part[self.t_peaks]),
+            y=np.array(y_part[self.t_peaks]),
             mode='text',
             text=["T"] * len(self.t_peaks),
             textfont=dict(color='#8B0000', size=25),
@@ -113,8 +116,10 @@ class EKGdata:
         """
         This function estimates the heart rate based on the ECG_Rate signal.
         """
-        heart_rate = self.signals["ECG_Rate"].mean()  # Durchschnittliche Herzfrequenz in bpm
-        return heart_rate
+        r_peaks, _= self.find_peaks()
+        total_time_minutes = (self.df["Zeit in ms"].max() - self.df["Zeit in ms"].min()) / (1000 * 60)
+        heart_rate = len(r_peaks) / total_time_minutes
+        return round(heart_rate, 2)
 
 if __name__ == "__main__":
     print("This is a module with some functions to read the EKG data")
