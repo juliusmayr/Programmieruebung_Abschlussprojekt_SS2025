@@ -54,7 +54,7 @@ with col2:
         st.write("__Info__")
     selected_person = st.session_state.selected_person
     with subcol1:
-        st.session_state.selected_ekg_test = st.selectbox("__EKG-Test auswählen__", options=["Bitte Wählen Sie einen Test aus"] + person.get_ekg_test_list())
+        st.session_state.selected_ekg_test = st.selectbox("__Ruhe-EKG auswählen__", options=["Bitte Wählen Sie einen Test aus"] + person.get_ekg_test_list())
 
     with subcol3:
         with st.popover(label = ":bar_chart:", help = "Hier können Sie einen EKG-Test hinzufügen."):
