@@ -1,12 +1,11 @@
 import streamlit as st
 from PIL import Image
-
 from src.classes.person import Person
 from src.classes.ekgdata import EKGdata
-from src.analyze_data import gpx_data, gpx_data_pydeck
-import os
+from src.analyze_data import gpx_data_pydeck, gpx_elevation_profile
+
 from datetime import timedelta
-from streamlit.components.v1 import html
+
 
 if "selected" not in st.session_state:
     st.session_state.selected = "Home"
@@ -22,7 +21,7 @@ with col1:
     list_of_persons = Person.get_person_list(persons_data)
 
     st.session_state.selected_person = st.selectbox("__Person auswählen__", options = list_of_persons)
-    #Laden eines Bildes 
+    # Laden eines Bildes 
     selected_person_data = Person.find_person_data_by_name(str(st.session_state.selected_person))
     person = Person(selected_person_data)
     person_image = selected_person_data["picture_path"]
@@ -44,11 +43,10 @@ with col1:
     with subcol2:
         with st.popover(label = ":heavy_plus_sign:", help="Hier können Sie eine neue Person hinzufügen."):
             st.write("Diese Funktion ist noch nicht implementiert.")
-            #
-    # Laden der EKG-Daten für die ausgewählte Person und den ausgewählten Test
+           
 
 
-#ekg_test = EKGdata.load_by_id(persons_data)
+
 
 with col2:
     subcol1, subcol2, subcol3 = st.columns([2, 3, 1])
@@ -80,7 +78,7 @@ with col2:
         st.plotly_chart(ekg_data.fig)
     
             
-        
+# Kartendarstellung der GPX-Daten
 
 st.write("## Kartendarstellung der GPX-Daten")
 
@@ -89,5 +87,10 @@ uploaded_file = st.file_uploader("Lade eine GPX-Datei hoch", type=["gpx"])
 
 try:
     gpx_data_pydeck(uploaded_file)
+    uploaded_file.seek(0)
+    fig = gpx_elevation_profile(uploaded_file)
+    #st.title("GPX Höhenprofil")
+    st.plotly_chart(fig)
 except:
     st.write("Bitte laden Sie eine GPX-Datei hoch, um die Kartendarstellung zu sehen.")
+
