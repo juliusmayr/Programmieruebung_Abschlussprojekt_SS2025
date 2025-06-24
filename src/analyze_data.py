@@ -6,6 +6,8 @@ import streamlit as st
 import json
 from geopy.distance import geodesic
 import plotly.graph_objects as go
+import numpy as np
+
 
 def gpx_data(uploaded_file):
     if uploaded_file is not None:
@@ -69,12 +71,14 @@ def gpx_data_pydeck(uploaded_file):
                     pickable=True,
                 ),
             ],
-        ))
+        ),
+        height= 300
+    )
     else:
         st.warning("Keine GPS-Punkte in der GPX-Datei gefunden.")
     return st.pydeck_chart
 
-def gpx_elevation_profile(uploaded_file):
+def gpx_elevation_profile(uploaded_file): #window_size=10):
     """ 
     Eine Funktion, die das Höhenprofil aus einer GPX-Datei extrahiert und als Plotly-Diagramm darstellt.
     """
@@ -98,10 +102,20 @@ def gpx_elevation_profile(uploaded_file):
                     distance.append(distance[-1] + dist)
                 last_point = point
 
+    # # Gleitender Mittelwert berechnen
+    # if len(elevation) >= window_size:
+    #     elevation_smooth = np.convolve(elevation, np.ones(window_size)/window_size, mode='valid')
+    #     # Die Distanz-Liste entsprechend kürzen, damit beide gleich lang sind
+    #     distance_smooth = distance[window_size-1:]
+    # else:
+    #     elevation_smooth = elevation
+    #     distance_smooth = distance
+
     fig = go.Figure(data=go.Scatter(x=distance, y=elevation, mode='lines', name='Höhenprofil'))
     fig.update_layout(
         title='Höhenprofil',
         xaxis_title='Distanz (m)',
         yaxis_title='Höhe (m)',
+        height=300
     )
     return fig

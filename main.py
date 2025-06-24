@@ -93,4 +93,3 @@ try:
     st.plotly_chart(fig)
 except:
     st.write("Bitte laden Sie eine GPX-Datei hoch, um die Kartendarstellung zu sehen.")
-
