@@ -129,6 +129,17 @@ class Person:
             st.success("Personendaten aktualisiert!")
             
 
+# def add_person(persons_data):
+#     """
+#     A Function that adds a new person to the persons json file.
+#     """
+#     st.write("Neue Person hinzufügen")
+#     with st.form("person_form"):
+#         id = len(persons_data) + 1
+#         firstname = st.text_input("Vorname")
+#         lastname = st.text_input("Nachname")
+#         date_of_birth = st.number_input("Geburtsjahr", min_value=1900, max_value=date.today().year, step=
+
         
 
 if __name__ == "__main__":

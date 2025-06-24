@@ -34,6 +34,7 @@ with col1:
     # Geschlecht der Person anzeigen
     st.write(f"__Geschlecht__: {person.gender}")
 
+    #Personendaten bearbeiten
     subcol1, subcol2 = st.columns([1, 1])
     with subcol1:
         with st.popover(label = "✏️", help="Hier können Sie die Personendaten bearbeiten."): 

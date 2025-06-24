@@ -119,3 +119,12 @@ def gpx_elevation_profile(uploaded_file): #window_size=10):
         height=300
     )
     return fig
+
+
+# def analyse_csv(uploaded_file):
+#     """
+#     Eine Funktiion, zu Analyse der HF und Einführen eines HF- Zonen- Diagramms.
+#     """
+#     if uploaded_file is not None:
+#         df = pd.read_csv(uploaded_file)
+        
