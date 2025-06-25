@@ -3,13 +3,14 @@ from PIL import Image
 from src.classes.person import Person
 from src.classes.ekgdata import EKGdata
 from datetime import timedelta
+from src.classes.person import add_person
+from src.classes.person import delete_person
 
 
 if "selected" not in st.session_state:
     st.session_state.selected = "Home"
 
-st.title("Das ist unsere erste App")
-st.write("## Hier ist der Inhalt der App")
+
 # Layout
 col1, col2 = st.columns([1, 3])
 with col1:
@@ -35,13 +36,19 @@ with col1:
     st.write(f"__Geschlecht__: {person.gender}")
 
     #Personendaten bearbeiten
-    subcol1, subcol2 = st.columns([1, 1])
+    subcol1, subcol2, subcol3= st.columns([1, 1, 1])
     with subcol1:
         with st.popover(label = "✏️", help="Hier können Sie die Personendaten bearbeiten."): 
             person.edit_person(persons_data)
+    #Person hinzufügen
     with subcol2:
         with st.popover(label = ":heavy_plus_sign:", help="Hier können Sie eine neue Person hinzufügen."):
-            st.write("Diese Funktion ist noch nicht implementiert.")
+            add_person(persons_data)
+    #Person löschen
+    with subcol3:
+        if st.button(label = "🗑️", help = "Hier wird diese Person gelöscht"):
+            delete_person(persons_data, person.id)
+            st.rerun() # Neu laden der Seite um die Änderung zu sehen
            
 
 

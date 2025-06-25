@@ -98,7 +98,7 @@ class Person:
         A Function that edits person json file.
         """
         st.write("Personendaten bearbeiten")
-        with st.form("person_form"):
+        with st.form("person_form_edit"):
             self.id = int(st.text_input("ID", value=str(self.id), disabled=True))
             self.firstname = st.text_input("Vorname", value=self.firstname)
             self.lastname = st.text_input("Nachname", value=self.lastname)
@@ -129,16 +129,56 @@ class Person:
             st.success("Personendaten aktualisiert!")
             
 
-# def add_person(persons_data):
-#     """
-#     A Function that adds a new person to the persons json file.
-#     """
-#     st.write("Neue Person hinzufügen")
-#     with st.form("person_form"):
-#         id = len(persons_data) + 1
-#         firstname = st.text_input("Vorname")
-#         lastname = st.text_input("Nachname")
-#         date_of_birth = st.number_input("Geburtsjahr", min_value=1900, max_value=date.today().year, step=
+def add_person(persons_data):
+    """
+    A Function that adds a new person to the persons json file.
+    """
+    st.write("Neue Person hinzufügen")
+    with st.form("person_form_add"):
+        id = len(persons_data) + 1
+        firstname = st.text_input("Vorname")
+        lastname = st.text_input("Nachname")
+        date_of_birth = st.number_input("Geburtsjahr", min_value=1900, max_value=date.today().year, step=1)
+        gender = st.selectbox("Geschlecht", options=["male","female", "diverse"])
+        picture = st.file_uploader("Bild hochladen", type=["jpg", "jpeg"])
+        submitted = st.form_submit_button("Hinzufügen")
+
+    if submitted:
+        if not firstname or not lastname:
+            st.warning("Bitte geben Sie Vor- und Nachnamen ein.")
+            return
+        if picture:
+            picture_path = f"data/pictures/{id}.jpg"
+            img = Image.open(picture)
+            img.save(picture_path, format="JPEG")
+        else:
+            picture_path = "data/pictures/default.jpg"
+        
+        new_person = {
+            "id": id,
+            "firstname": firstname,
+            "lastname": lastname,
+            "date_of_birth": int(date_of_birth),
+            "gender": gender,
+            "picture_path": picture_path,
+            "ekg_tests": []
+        }
+        persons_data.append(new_person)
+        with open("data/person_db.json", "w") as file:
+            json.dump(persons_data, file, indent=4)
+        st.success("Neue Person hinzugefügt!")
+
+def delete_person(persons_data, person_id):
+    """
+    Einer Funktion, die eine Person anhand der ID aus der JSON-Datei löscht und vergibt neue IDs.
+    """
+    new_persons_data = [p for p in persons_data if p["id"] != person_id] # IDs werden neu vergeben
+    for idx, person in enumerate(new_persons_data, start=1):
+        person["id"] = idx
+    #Speicher
+    with open("data/person_db.json", "w") as file:
+        json.dump(new_persons_data, file, indent=4)
+    st.success("Person gelöscht!")
 
         
 
