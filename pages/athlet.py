@@ -44,6 +44,7 @@ with col1:
     with subcol2:
         with st.popover(label = ":heavy_plus_sign:", help="Hier können Sie eine neue Person hinzufügen."):
             add_person(persons_data)
+            #st.rerun() # funktioniert nicht, üsste man ändern ansonsten hängt sich die seite auf 
     #Person löschen
     with subcol3:
         if st.button(label = "🗑️", help = "Hier wird diese Person gelöscht"):

@@ -179,6 +179,8 @@ def delete_person(persons_data, person_id):
     with open("data/person_db.json", "w") as file:
         json.dump(new_persons_data, file, indent=4)
     st.success("Person gelöscht!")
+    #Bild wird nicht mitgelöscht, hab noch nicht herausgefunden wie es funktioniert
+    
 
         
 
