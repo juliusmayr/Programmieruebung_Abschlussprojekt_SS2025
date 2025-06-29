@@ -32,7 +32,7 @@ with col1:
     st.write(f"__Alter__: {person.calc_age()} Jahre")
     st.write(f"__Geburtsjahr__: {person.date_of_birth}")
 
-    # Geschlecht der Person anzeigen
+    # Geschlecht der Person anzeigenr
     st.write(f"__Geschlecht__: {person.gender}")
 
     #Personendaten bearbeiten

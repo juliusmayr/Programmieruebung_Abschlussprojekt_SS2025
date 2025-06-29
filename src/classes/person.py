@@ -2,6 +2,7 @@ import json
 from datetime import date
 import streamlit as st
 from PIL import Image
+import os
 
 class Person:
     
@@ -62,7 +63,7 @@ class Person:
         self.date_of_birth = person_dict["date_of_birth"]
         self.firstname = person_dict["firstname"]
         self.lastname = person_dict["lastname"]
-        self.picture_path = person_dict["picture_path"]
+        self.picture_path = person_dict["picture_path"] if "picture_path" in person_dict else "data/pictures/default.jpg"
         self.id = person_dict["id"]
         self.gender = person_dict["gender"]
 
@@ -172,14 +173,19 @@ def delete_person(persons_data, person_id):
     """
     Einer Funktion, die eine Person anhand der ID aus der JSON-Datei löscht und vergibt neue IDs.
     """
+    # Bild löschen
+    picture_path = f"data/pictures/{person_id}.jpg"
+    if os.path.exists(picture_path):
+        os.remove(picture_path)
+    
     new_persons_data = [p for p in persons_data if p["id"] != person_id] # IDs werden neu vergeben
     for idx, person in enumerate(new_persons_data, start=1):
         person["id"] = idx
     #Speicher
     with open("data/person_db.json", "w") as file:
         json.dump(new_persons_data, file, indent=4)
+    
     st.success("Person gelöscht!")
-    #Bild wird nicht mitgelöscht, hab noch nicht herausgefunden wie es funktioniert
     
 
         
