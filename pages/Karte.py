@@ -1,6 +1,17 @@
 import streamlit as st
 from src.analyze_data import gpx_data_pydeck, gpx_elevation_profile
 
+st.set_page_config(
+    page_title="GPX",
+    page_icon="🗺️",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
+with st.sidebar:
+    st.title("🗺️ Karte")
+    st.markdown("Willkommen im Karten-Bereich!")
+
 st.title("GPX-Datenanalyse")
 uploaded_file = st.file_uploader("Lade eine GPX-Datei hoch", type=["gpx"])
 

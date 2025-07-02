@@ -6,6 +6,15 @@ from datetime import timedelta
 # from src.classes.person import add_person
 # from src.classes.person import delete_person
 
+st.set_page_config(
+    page_title="Athlet",
+    page_icon="🏃",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+with st.sidebar:
+    st.title("🏃 Athlet")
+    st.markdown("Willkommen im Athletenbereich!")
 
 if "selected" not in st.session_state:
     st.session_state.selected = "Home"
