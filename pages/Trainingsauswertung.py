@@ -20,13 +20,24 @@ try:
     options = ["Person auswählen"] + list_of_persons
 except Exception:
     options = ["Person auswählen"]
-if "selected_person" not in st.session_state:
-    st.session_state.selected_person = options[0]
-selected_index = options.index(st.session_state.selected_person) if st.session_state.selected_person in options else 0
-selected = st.selectbox("Person auswählen", options=options, index=selected_index, key="selected_person_box")
-if selected != st.session_state.selected_person:
-    st.session_state.selected_person = selected
-athlet = st.session_state.selected_person
+if "selected_person_trainingsauswertung" not in st.session_state:
+    st.session_state.selected_person_trainingsauswertung = options[0]
+selected_index = options.index(st.session_state.selected_person_trainingsauswertung) if st.session_state.selected_person_trainingsauswertung in options else 0
+selected = st.selectbox("Person auswählen", options=options, index=selected_index, key="selected_person_box_trainingsauswertung")
+if selected != st.session_state.selected_person_trainingsauswertung:
+    st.session_state.selected_person_trainingsauswertung = selected
+athlet = st.session_state.selected_person_trainingsauswertung
+
+# Einheitliche Prüfung auf 'Person auswählen'
+def is_person_selected():
+    return athlet != "Person auswählen"
+
+def get_person_db_name(person):
+    """Wandelt 'Nachname, Vorname' in 'Vorname Nachname' um, falls nötig."""
+    if "," in person:
+        last, first = [x.strip() for x in person.split(",", 1)]
+        return f"{first} {last}"
+    return person
 
 # --- Uploadfelder in einer Zeile am Anfang der Seite ---
 col_gpx, col_fit = st.columns(2)
@@ -40,13 +51,13 @@ with col_gpx:
     uploaded_file = st.file_uploader("Lade eine GPX-Datei hoch", type=["gpx"], key="gpx_uploader")
     # Auswahlfeld für vorhandene GPX-Dateien der gewählten Person
     gpx_auswahl = None
-    if 'athlet' in locals() and athlet != "Bitte wählen":
+    if is_person_selected():
         try:
             with open("data/person_db.json", "r", encoding="utf-8") as f:
                 db = json.load(f)
             for person in db.get("_default", {}).values():
                 name = f"{person.get('firstname', '')} {person.get('lastname', '')}".strip()
-                if name == athlet:
+                if name == get_person_db_name(athlet):
                     gpx_files = person.get("gpx_files", [])
                     break
             else:
@@ -70,7 +81,7 @@ with col_gpx:
 
 # --- GPX-Upload: Success/Fehler direkt unter das Uploadfeld (nach Athletenauswahl) ---
 with col_gpx:
-    if uploaded_file is not None and athlet != "Bitte wählen":
+    if uploaded_file is not None and is_person_selected():
         import os
         gpx_dir = os.path.join("data", "gpx_files")
         os.makedirs(gpx_dir, exist_ok=True)
@@ -84,7 +95,7 @@ with col_gpx:
                 db = json.load(f)
             for person in db.get("_default", {}).values():
                 name = f"{person.get('firstname', '')} {person.get('lastname', '')}".strip()
-                if name == athlet:
+                if name == get_person_db_name(athlet):
                     if "gpx_files" not in person:
                         person["gpx_files"] = []
                     if rel_gpx_path not in person["gpx_files"]:
@@ -95,7 +106,7 @@ with col_gpx:
             st.success("GPX-Verknüpfung in der Datenbank gespeichert.")
         except Exception as e:
             st.error(f"Fehler beim Speichern der GPX-Verknüpfung in der Datenbank: {e}")
-    elif uploaded_file is not None and athlet == "Bitte wählen":
+    elif uploaded_file is not None and not is_person_selected():
         st.warning("Bitte wähle zuerst einen Athleten aus.")
 
 # --- Layout: linke Spalte GPX, rechte Spalte CSV-Visualisierung ---
@@ -122,13 +133,13 @@ with main_col_gpx:
 with main_col_csv:
     # --- CSV-Plot: Spaltenauswahl und Plotly-Diagramm ---
     from src.analyze_data import plot_csv_column_over_time
-    if athlet != "Bitte wählen":
+    if is_person_selected():
         try:
             with open("data/person_db.json", "r", encoding="utf-8") as f:
                 db = json.load(f)
             for person in db.get("_default", {}).values():
                 name = f"{person.get('firstname', '')} {person.get('lastname', '')}".strip()
-                if name == athlet:
+                if name == get_person_db_name(athlet):
                     fit_files = person.get("fit_files", [])
                     break
             else:
@@ -211,7 +222,7 @@ with main_col_csv:
 
 # --- Neues Feature: FIT-Datei Upload, Speicherung und Konvertierung zu CSV mit Athletenauswahl ---
 
-if fit_file is not None and athlet != "Bitte wählen":
+if fit_file is not None and is_person_selected():
     import os
     fit_dir = os.path.join("data", "fit_files")
     csv_dir = os.path.join("data", "csv_files")
@@ -236,7 +247,7 @@ if fit_file is not None and athlet != "Bitte wählen":
             # Finde die Person anhand des Namens
             for person in db.get("_default", {}).values():
                 name = f"{person.get('firstname', '')} {person.get('lastname', '')}".strip()
-                if name == athlet:
+                if name == get_person_db_name(athlet):
                     if "fit_files" not in person:
                         person["fit_files"] = []
                     person["fit_files"].append({"fit_path": rel_fit_path, "csv_path": rel_csv_path})
@@ -248,11 +259,11 @@ if fit_file is not None and athlet != "Bitte wählen":
             st.error(f"Fehler beim Speichern der Verknüpfung in der Datenbank: {e}")
     except Exception as e:
         st.error(f"Fehler beim Konvertieren der FIT-Datei: {e}")
-elif fit_file is not None and athlet == "Bitte wählen":
+elif fit_file is not None and not is_person_selected():
     st.warning("Bitte wähle zuerst einen Athleten aus.")
 
 # --- GPX-Datei nach Upload mit Athlet in TinyDB JSON verknüpfen ---
-if uploaded_file is not None and athlet != "Bitte wählen":
+if uploaded_file is not None and is_person_selected():
     import os
     gpx_dir = os.path.join("data", "gpx_files")
     os.makedirs(gpx_dir, exist_ok=True)
@@ -266,7 +277,7 @@ if uploaded_file is not None and athlet != "Bitte wählen":
             db = json.load(f)
         for person in db.get("_default", {}).values():
             name = f"{person.get('firstname', '')} {person.get('lastname', '')}".strip()
-            if name == athlet:
+            if name == get_person_db_name(athlet):
                 if "gpx_files" not in person:
                     person["gpx_files"] = []
                 if rel_gpx_path not in person["gpx_files"]:
@@ -279,14 +290,14 @@ if uploaded_file is not None and athlet != "Bitte wählen":
         st.error(f"Fehler beim Speichern der GPX-Verknüpfung in der Datenbank: {e}")
 
 # --- FIT/CSV-Paare für den ausgewählten Athleten anzeigen und löschen ---
-if athlet != "Bitte wählen":
+if is_person_selected():
     try:
         with open("data/person_db.json", "r", encoding="utf-8") as f:
             db = json.load(f)
         # Finde die Person anhand des Namens
         for person in db.get("_default", {}).values():
             name = f"{person.get('firstname', '')} {person.get('lastname', '')}".strip()
-            if name == athlet:
+            if name == get_person_db_name(athlet):
                 fit_files = person.get("fit_files", [])
                 break
         else:
@@ -327,14 +338,14 @@ if athlet != "Bitte wählen":
         st.error(f"Fehler beim Laden der FIT/CSV-Paare: {e}")
 
 # --- GPX-Dateien für den ausgewählten Athleten anzeigen und löschen ---
-if athlet != "Bitte wählen":
+if is_person_selected():
     try:
         with open("data/person_db.json", "r", encoding="utf-8") as f:
             db = json.load(f)
         # Finde die Person anhand des Namens
         for person in db.get("_default", {}).values():
             name = f"{person.get('firstname', '')} {person.get('lastname', '')}".strip()
-            if name == athlet:
+            if name == get_person_db_name(athlet):
                 gpx_files = person.get("gpx_files", [])
                 break
         else:
