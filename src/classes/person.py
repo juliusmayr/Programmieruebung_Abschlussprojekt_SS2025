@@ -53,7 +53,11 @@ class Person:
         with st.form("person_form_add"):
             db = Person.get_db()
             all_persons = db.all()
-            id = (max([p["id"] for p in all_persons], default=0) + 1)
+            used_ids = set(p["id"] for p in all_persons)
+            # Finde die kleinste freie ID
+            id = 1
+            while id in used_ids:
+                id += 1
             firstname = st.text_input("Vorname")
             lastname = st.text_input("Nachname")
             date_of_birth = st.number_input("Geburtsjahr", min_value=1900, max_value=date.today().year, step=1)
@@ -89,11 +93,7 @@ class Person:
     def delete_person(persons_data, person_id):
         db = Person.get_db()
         db.remove(Query().id == person_id)
-        # IDs neu vergeben
-        all_persons = sorted(db.all(), key=lambda x: x["id"])
-        for idx, person in enumerate(all_persons, start=1):
-            if person["id"] != idx:
-                db.update({"id": idx}, Query().id == person["id"])
+        # IDs NICHT mehr neu vergeben, sondern Lücken lassen
         db.close()
         # Bild löschen
         picture_path = f"data/pictures/{person_id}.jpg"
