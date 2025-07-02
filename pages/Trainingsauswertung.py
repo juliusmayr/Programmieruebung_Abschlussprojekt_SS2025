@@ -8,7 +8,7 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
-
+# 
 # --- Athletenauswahl ganz oben ---
 persons_data = None
 list_of_persons = None
