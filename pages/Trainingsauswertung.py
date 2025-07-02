@@ -9,29 +9,29 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# --- Athletenauswahl ganz oben ---
+persons_data = None
+list_of_persons = None
+options = None
+try:
+    from src.classes.person import Person
+    persons_data = Person.load_person_data()
+    list_of_persons = Person.get_person_list(persons_data)
+    options = ["Person auswählen"] + list_of_persons
+except Exception:
+    options = ["Person auswählen"]
+if "selected_person" not in st.session_state:
+    st.session_state.selected_person = options[0]
+selected_index = options.index(st.session_state.selected_person) if st.session_state.selected_person in options else 0
+selected = st.selectbox("Person auswählen", options=options, index=selected_index, key="selected_person_box")
+if selected != st.session_state.selected_person:
+    st.session_state.selected_person = selected
+athlet = st.session_state.selected_person
+
 # --- Uploadfelder in einer Zeile am Anfang der Seite ---
 col_gpx, col_fit = st.columns(2)
 with col_fit:
     st.subheader("FIT-Datei Upload")
-    # Athletenliste dynamisch laden
-    athleten = ["Bitte wählen"]
-    try:
-        with open("data/person_db.json", "r", encoding="utf-8") as f:
-            db = json.load(f)
-            for person in db.get("_default", {}).values():
-                name = f"{person.get('firstname', '')} {person.get('lastname', '')}".strip()
-                if name:
-                    athleten.append(name)
-    except Exception as e:
-        st.warning(f"Konnte Athletenliste nicht laden: {e}")
-    athlet_key = "athlet_select"
-    if athlet_key not in st.session_state:
-        st.session_state[athlet_key] = athleten[0]
-    athlet_index = athleten.index(st.session_state[athlet_key]) if st.session_state[athlet_key] in athleten else 0
-    selected_athlet = st.selectbox("Wähle den Athleten", athleten, index=athlet_index, key="athlet_select_box")
-    if selected_athlet != st.session_state[athlet_key]:
-        st.session_state[athlet_key] = selected_athlet
-    athlet = st.session_state[athlet_key]
     fit_file = st.file_uploader("Lade eine FIT-Datei hoch", type=["fit"], key="fit_uploader")
     st.info("Bitte lade eine FIT-Datei hoch, um sie zu speichern und zu konvertieren.")
 
