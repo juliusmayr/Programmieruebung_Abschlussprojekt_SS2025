@@ -64,10 +64,11 @@ with col1:
                     st.rerun()
         # Person löschen
         with subcol3:
-            if st.button(label = "🗑️", help = "Hier wird diese Person gelöscht"):
-                Person.delete_person(persons_data, person.id)
-                st.success("Personendaten wurden gelöscht") 
-                st.rerun() # Neu laden der Seite um die Änderung zu sehen
+            if st.session_state.selected_person != "Person auswählen":
+                if st.button(label = "🗑️", help = "Hier wird diese Person gelöscht"):
+                    Person.delete_person(persons_data, person.id)
+                    st.success("Personendaten wurden gelöscht") 
+                    st.rerun() # Neu laden der Seite um die Änderung zu sehen
 
     except:
         
@@ -98,22 +99,55 @@ with col2:
             st.session_state.selected_ekg_test = "Bitte Wählen Sie einen Test aus" # Stellt sicher, dass nach dem Löschen der Person kein Fehler angezeigt wird
 
     with subcol3:
-        with st.popover(label = ":bar_chart:", help = "Hier können Sie einen EKG-Test hinzufügen."):
-            st.write("Diese Funktion ist noch nicht implementiert.")
-    ekg_data_selected = EKGdata.load_by_id(persons_data, st.session_state.selected_ekg_test)
-    if st.session_state.selected_ekg_test != "Bitte Wählen Sie einen Test aus":
-        ekg_test = EKGdata.load_by_id(persons_data, st.session_state.selected_ekg_test)
-        ekg_data = EKGdata(ekg_test)
-        with subcol2:
-            hours =  (ekg_data.df["Zeit in ms"].max() - ekg_data.df["Zeit in ms"].min()) / (1000*60**2)
-            td = timedelta(hours=hours)  # Konvertiere ms zu Minuten
-            total_seconds = td.total_seconds()
-            #whole_hours = int(total_seconds // 3600)
-            minutes = int((total_seconds % 3600) // 60)
-            st.write(f"__Testdauer__: {minutes} Minuten")
-            st.write(f"__Testdatum__: {ekg_test['date']}")
-            heart_rate = ekg_data.estimate_heart_rate()
-            st.write(f"__⌀ Herzfrequenz__: {heart_rate} [bpm]")
-        
-        ekg_data.fig = ekg_data.plot_time_series()
-        st.plotly_chart(ekg_data.fig)
+        if selected_person != "Person auswählen":
+            with st.popover(label=":bar_chart:", help="Hier können Sie einen EKG-Test hinzufügen."):
+                st.write("EKG-Test hinzufügen")
+                with st.form("ekg_upload_form"):
+                    ekg_file = st.file_uploader("EKG-Datei hochladen (.txt)", type=["txt"])
+                    test_date = st.date_input("Testdatum", format="DD.MM.YYYY")
+                    submitted = st.form_submit_button("Hinzufügen")
+                if submitted and ekg_file is not None:
+                    # Lade aktuelle Personendaten
+                    person_data = Person.find_person_data_by_name(selected_person)
+                    if not person_data:
+                        st.error("Fehler beim Laden der Personendaten.")
+                    else:
+                        # Bestimme nächste freie Test-ID
+                        all_persons = Person.load_person_data()
+                        all_ekg_ids = [ekg["id"] for p in all_persons for ekg in p.get("ekg_tests", [])]
+                        next_id = max(all_ekg_ids) + 1 if all_ekg_ids else 1
+                        # Dateiname bestimmen
+                        filename = f"{str(next_id).zfill(2)}_Ruhe.txt"
+                        save_path = f"data/ekg_data/{filename}"
+                        # Datei speichern
+                        with open(save_path, "wb") as f:
+                            f.write(ekg_file.read())
+                        # Testdaten ergänzen
+                        new_ekg = {"id": next_id, "date": test_date.strftime("%d.%m.%Y"), "result_link": save_path}
+                        # Update TinyDB
+                        from tinydb import TinyDB, Query
+                        db = TinyDB(Person.db_path)
+                        db.update({"ekg_tests": person_data.get("ekg_tests", []) + [new_ekg]}, Query().id == person_data["id"])
+                        db.close()
+                        st.success("EKG-Test erfolgreich hinzugefügt!")
+                        st.rerun()
+                elif submitted and ekg_file is None:
+                    st.warning("Bitte laden Sie eine EKG-Datei hoch.")
+    ekg_data_selected = None
+    if selected_person != "Person auswählen":
+        ekg_data_selected = EKGdata.load_by_id(persons_data, st.session_state.selected_ekg_test)
+        if st.session_state.selected_ekg_test != "Bitte Wählen Sie einen Test aus":
+            ekg_test = EKGdata.load_by_id(persons_data, st.session_state.selected_ekg_test)
+            if ekg_test is not None:
+                ekg_data = EKGdata(ekg_test)
+                with subcol2:
+                    hours =  (ekg_data.df["Zeit in ms"].max() - ekg_data.df["Zeit in ms"].min()) / (1000*60**2)
+                    td = timedelta(hours=hours)  # Konvertiere ms zu Minuten
+                    total_seconds = td.total_seconds()
+                    minutes = int((total_seconds % 3600) // 60)
+                    st.write(f"__Testdauer__: {minutes} Minuten")
+                    st.write(f"__Testdatum__: {ekg_test['date']}")
+                    heart_rate = ekg_data.estimate_heart_rate()
+                    st.write(f"__⌀ Herzfrequenz__: {heart_rate} [bpm]")
+                ekg_data.fig = ekg_data.plot_time_series()
+                st.plotly_chart(ekg_data.fig)

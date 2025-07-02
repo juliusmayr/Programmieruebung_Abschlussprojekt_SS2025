@@ -92,6 +92,13 @@ class Person:
     @staticmethod
     def delete_person(persons_data, person_id):
         db = Person.get_db()
+        # Vor dem Löschen: EKG-Dateien entfernen
+        person = db.search(Query().id == person_id)
+        if person and "ekg_tests" in person[0]:
+            for ekg in person[0]["ekg_tests"]:
+                ekg_path = ekg.get("result_link")
+                if ekg_path and os.path.exists(ekg_path):
+                    os.remove(ekg_path)
         db.remove(Query().id == person_id)
         # IDs NICHT mehr neu vergeben, sondern Lücken lassen
         db.close()
