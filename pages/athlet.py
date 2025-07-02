@@ -48,7 +48,7 @@ with col1:
                 before = len(persons_data)
                 Person.add_person(persons_data)
                 # Lade die Daten nach dem Hinzufügen neu
-                st.success("Neue Person wurde hinzugefügt!")
+            
                 after_data = Person.load_person_data()
                 after = len(after_data)
                 if after > before:

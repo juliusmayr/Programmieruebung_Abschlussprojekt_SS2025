@@ -3,79 +3,67 @@ from datetime import date
 import streamlit as st
 from PIL import Image
 import os
+from tinydb import TinyDB, Query
 
 class Person:
-    
+    db_path = "data/person_db.json"
+
+    @staticmethod
+    def get_db():
+        return TinyDB(Person.db_path)
+
     @staticmethod
     def load_person_data():
-        """A Function that knows where the person Database is and returns a Dictionary with the Persons"""
-        file = open("data/person_db.json")
-        person_data = json.load(file)
-        return person_data
-    
+        db = Person.get_db()
+        data = db.all()
+        db.close()
+        return data
 
     @staticmethod
     def load_by_id(person_id):
-        """
-        A Function that knows where the persons id is.
-        Returns a Dictionary with the Persons.
-        """
-        person_data = Person.load_person_data()
-        for person in person_data: 
-            if person_id == person["id"]:
-                return person_data[person_id-1]  # IDs in JSON sind 1-basiert, Python-Listen sind 0-basiert
-        return {'None'}
-            
+        db = Person.get_db()
+        result = db.search(Query().id == person_id)
+        db.close()
+        if result:
+            return result[0]
+        return {}
+
     @staticmethod
     def get_person_list(person_data):
-        """A Function that takes the persons-dictionary and returns a list of all person names"""
-        list_of_names = []
+        return [f'{eintrag["lastname"]}, {eintrag["firstname"]}' for eintrag in person_data]
 
-        for eintrag in person_data:
-            list_of_names.append(eintrag["lastname"] + ", " +  eintrag["firstname"])
-        return list_of_names
-    
     @staticmethod
     def find_person_data_by_name(suchstring):
-        """ Eine Funktion der Nachname, Vorname als ein String übergeben wird
-        und die die Person als Dictionary zurück gibt"""
-
-        person_data = Person.load_person_data()
-        #print(suchstring)
         if suchstring == "None":
             return {}
-
-        two_names = suchstring.split(", ")
-        vorname = two_names[1]
-        nachname = two_names[0]
-
-        for eintrag in person_data:
-            print(eintrag)
-            if (eintrag["lastname"] == nachname and eintrag["firstname"] == vorname):
-                print()
-
-                return eintrag
-        else:
+        try:
+            nachname, vorname = suchstring.split(", ")
+        except Exception:
             return {}
-        
+        db = Person.get_db()
+        result = db.search((Query().lastname == nachname) & (Query().firstname == vorname))
+        db.close()
+        if result:
+            return result[0]
+        return {}
+
     @staticmethod
     def add_person(persons_data):
-        """
-        A Function that adds a new person to the persons json file.
-        """
         st.write("Neue Person hinzufügen")
         with st.form("person_form_add"):
-            id = len(persons_data) + 1
+            db = Person.get_db()
+            all_persons = db.all()
+            id = (max([p["id"] for p in all_persons], default=0) + 1)
             firstname = st.text_input("Vorname")
             lastname = st.text_input("Nachname")
             date_of_birth = st.number_input("Geburtsjahr", min_value=1900, max_value=date.today().year, step=1)
             gender = st.selectbox("Geschlecht", options=["male","female", "diverse"])
             picture = st.file_uploader("Bild hochladen", type=["jpg", "jpeg"])
             submitted = st.form_submit_button("Hinzufügen")
-
         if submitted:
             if not firstname or not lastname:
                 st.warning("Bitte geben Sie Vor- und Nachnamen ein.")
+                db.close()
                 return
             if picture:
                 picture_path = f"data/pictures/{id}.jpg"
@@ -83,7 +71,6 @@ class Person:
                 img.save(picture_path, format="JPEG")
             else:
                 picture_path = "data/pictures/default.jpg"
-            
             new_person = {
                 "id": id,
                 "firstname": firstname,
@@ -93,28 +80,25 @@ class Person:
                 "picture_path": picture_path,
                 "ekg_tests": []
             }
-            persons_data.append(new_person)
-            with open("data/person_db.json", "w") as file:
-                json.dump(persons_data, file, indent=4)
-            st.success("Neue Person hinzugefügt!")
+            db.insert(new_person)
+            db.close()
+            st.success("Person erfolgreich hinzugefügt!")
+            
 
     @staticmethod
     def delete_person(persons_data, person_id):
-        """
-        Eine Funktion, die eine Person anhand der ID aus der JSON-Datei löscht und vergibt neue IDs.
-        """
-        
-        new_persons_data = [p for p in persons_data if p["id"] != person_id] # IDs werden neu vergeben
-        for idx, person in enumerate(new_persons_data, start=1):
-            person["id"] = idx
-        #Speicher
-        with open("data/person_db.json", "w") as file:
-            json.dump(new_persons_data, file, indent=4)
+        db = Person.get_db()
+        db.remove(Query().id == person_id)
+        # IDs neu vergeben
+        all_persons = sorted(db.all(), key=lambda x: x["id"])
+        for idx, person in enumerate(all_persons, start=1):
+            if person["id"] != idx:
+                db.update({"id": idx}, Query().id == person["id"])
+        db.close()
         # Bild löschen
         picture_path = f"data/pictures/{person_id}.jpg"
         if os.path.exists(picture_path):
             os.remove(picture_path)
-        
 
     def __init__(self, person_dict) -> None:
         self.date_of_birth = person_dict["date_of_birth"]
@@ -125,36 +109,21 @@ class Person:
         self.gender = person_dict["gender"]
 
     def get_ekg_test_list(self):
-        """ 
-        A Function that returns a list of all EKG tests available for the person.
-        """
         data = Person.load_by_id(self.id)
         if "ekg_tests" in data:
-            ekg_tests = []
-            for ekg_test in data["ekg_tests"]:
-                ekg_tests.append(ekg_test["id"])
-            return ekg_tests
-    
+            return [ekg_test["id"] for ekg_test in data["ekg_tests"]]
+
     def calc_age(self):
-        """
-        A Function that calculates the age of a person based on the date of birth
-        """
         today = date.today()
         age = today.year - int(self.date_of_birth)
         return age
 
     def calc_max_heart_rate(self):
-        """
-        A Function that calculates the Persons maximum Heart Rate based on the age.
-        """
         age = self.calc_age()
         max_heart_rate = 220 - age
         return max_heart_rate
-    
+
     def edit_person(self, persons_data):
-        """
-        A Function that edits person json file.
-        """
         st.write("Personendaten bearbeiten")
         with st.form("person_form_edit"):
             self.id = int(st.text_input("ID", value=str(self.id), disabled=True))
@@ -166,29 +135,18 @@ class Person:
             img = Image.open(picture) if picture else Image.open(self.picture_path)
             img.save(self.picture_path, format="JPEG")
             submitted = st.form_submit_button("Speichern")
-
         if submitted:
-            for person in persons_data:
-                
-                if str(person["id"]) == str(self.id):
-                    
-                    person["id"] = self.id
-                    person["date_of_birth"] = self.date_of_birth
-                    person["firstname"] = self.firstname
-                    person["lastname"] = self.lastname
-                    person["gender"] = self.gender
-                    person["picture_path"] = self.picture_path
-                    person["ekg_tests"] = person["ekg_tests"]
-                    break
-            save_path = "data/person_db.json"
-        
-            with open(save_path, "w") as file:
-                json.dump(persons_data, file, indent=4)
+            db = Person.get_db()
+            db.update({
+                "firstname": self.firstname,
+                "lastname": self.lastname,
+                "date_of_birth": self.date_of_birth,
+                "gender": self.gender,
+                "picture_path": self.picture_path
+            }, Query().id == self.id)
+            db.close()
             st.success("Personendaten aktualisiert!")
-            
 
-
-        
 
 if __name__ == "__main__":
     print("This is a module with some functions to read the person data")

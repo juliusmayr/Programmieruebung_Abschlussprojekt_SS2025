@@ -5,7 +5,7 @@
 groups = ["default"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:b86a9803baa63fdd14117ec000ba3a9a4f3afa08e1939accc9a06d5f32e20960"
+content_hash = "sha256:8a13b69496299e59fecdea8b6907c23507494cd016387c99a61dd3bd14ea1a8f"
 
 [[metadata.targets]]
 requires_python = "==3.13.*"
@@ -2107,6 +2107,17 @@ dependencies = [
 files = [
     {file = "tinycss2-1.4.0-py3-none-any.whl", hash = "sha256:3a49cf47b7675da0b15d0c6e1df8df4ebd96e9394bb905a5775adb0d884c5289"},
     {file = "tinycss2-1.4.0.tar.gz", hash = "sha256:10c0972f6fc0fbee87c3edb76549357415e94548c1ae10ebccdea16fb404a9b7"},
+]
+
+[[package]]
+name = "tinydb"
+version = "4.8.2"
+requires_python = "<4.0,>=3.8"
+summary = "TinyDB is a tiny, document oriented database optimized for your happiness :)"
+groups = ["default"]
+files = [
+    {file = "tinydb-4.8.2-py3-none-any.whl", hash = "sha256:f97030ee5cbc91eeadd1d7af07ab0e48ceb04aa63d4a983adbaca4cba16e86c3"},
+    {file = "tinydb-4.8.2.tar.gz", hash = "sha256:f7dfc39b8d7fda7a1ca62a8dbb449ffd340a117c1206b68c50b1a481fb95181d"},
 ]
 
 [[package]]

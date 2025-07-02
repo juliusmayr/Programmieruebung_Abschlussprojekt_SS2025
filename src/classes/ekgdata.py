@@ -3,6 +3,7 @@ import pandas as pd
 import plotly.graph_objects as go
 import neurokit2 as nk
 import numpy as np
+from tinydb import TinyDB
 
 from src.classes.person import Person
 
@@ -123,15 +124,15 @@ class EKGdata:
 
 if __name__ == "__main__":
     print("This is a module with some functions to read the EKG data")
-    file = open("data/person_db.json")
-    person_data = json.load(file)
-    ekg_dict = person_data[0]["ekg_tests"][0]
-    print(ekg_dict)
-    ekg = EKGdata(ekg_dict)
-    print(ekg.df.head())
-
-    test_ekg = EKGdata(ekg_dict)
-    print("Estimated Heart Rate:", test_ekg.estimate_heart_rate(), "[BPM]")
-    test_ekg.plot_time_series().show(renderer="browser")
-    # test_ekg.estimate_heart_rate()
-    
+    db = TinyDB("data/person_db.json")
+    person_data = db.all()
+    if person_data and "ekg_tests" in person_data[0] and person_data[0]["ekg_tests"]:
+        ekg_dict = person_data[0]["ekg_tests"][0]
+        print(ekg_dict)
+        ekg = EKGdata(ekg_dict)
+        print(ekg.df.head())
+        test_ekg = EKGdata(ekg_dict)
+        print("Estimated Heart Rate:", test_ekg.estimate_heart_rate(), "[BPM]")
+        test_ekg.plot_time_series().show(renderer="browser")
+    else:
+        print("Keine EKG-Tests in der Datenbank gefunden.")
