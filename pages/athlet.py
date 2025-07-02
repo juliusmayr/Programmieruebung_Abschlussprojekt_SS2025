@@ -14,7 +14,7 @@ st.set_page_config(
 )
 with st.sidebar:
     st.title("🏃 Athlet")
-    st.markdown("Willkommen im Athletenbereich!")
+    st.subheader("Willkommen im Athletenbereich!")
 
 if "selected" not in st.session_state:
     st.session_state.selected = "Home"

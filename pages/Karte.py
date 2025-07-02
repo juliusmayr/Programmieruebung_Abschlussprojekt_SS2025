@@ -10,7 +10,7 @@ st.set_page_config(
 
 with st.sidebar:
     st.title("🗺️ Karte")
-    st.markdown("Willkommen im Karten-Bereich!")
+    st.subheader("Willkommen im Karten-Bereich!")
 
 st.title("GPX-Datenanalyse")
 uploaded_file = st.file_uploader("Lade eine GPX-Datei hoch", type=["gpx"])

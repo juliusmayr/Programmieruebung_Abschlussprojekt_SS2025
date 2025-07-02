@@ -12,7 +12,8 @@ st.set_page_config(
 
 with st.sidebar:
     st.title("📅 Kalender")
-    st.markdown("Willkommen im Kalender-Bereich!")
+    st.subheader("Willkommen im Kalender-Bereich!")
+    st.write("Hier werden Ihnen alle EKG-Tests der Athleten angezeigt.")
 
 # Interaktive Monatsansicht mit streamlit-calendar
 st.subheader("Monatsansicht")
