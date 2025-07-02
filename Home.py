@@ -15,7 +15,7 @@ with column1:
     st.page_link("pages/athlet.py", label="🏃 Athlet")
 
 with column2:
-    st.page_link("pages/trainingsauswertung.py", label="🗺️ Trainingsauswertung")
+    st.page_link("pages/Trainingsauswertung.py", label="🗺️ Trainingsauswertung")
 
 with column3:
     st.page_link("pages/kalender.py", label="📅 Kalender")
