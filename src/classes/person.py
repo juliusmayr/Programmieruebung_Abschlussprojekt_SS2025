@@ -94,11 +94,25 @@ class Person:
         db = Person.get_db()
         # Vor dem Löschen: EKG-Dateien entfernen
         person = db.search(Query().id == person_id)
-        if person and "ekg_tests" in person[0]:
-            for ekg in person[0]["ekg_tests"]:
-                ekg_path = ekg.get("result_link")
-                if ekg_path and os.path.exists(ekg_path):
-                    os.remove(ekg_path)
+        if person:
+            p = person[0]
+            # EKG-Dateien löschen
+            if "ekg_tests" in p:
+                for ekg in p["ekg_tests"]:
+                    ekg_path = ekg.get("result_link")
+                    if ekg_path and os.path.exists(ekg_path):
+                        os.remove(ekg_path)
+            # FIT- und CSV-Dateien löschen
+            if "fit_files" in p:
+                for file_pair in p["fit_files"]:
+                    for path in [file_pair.get("fit_path"), file_pair.get("csv_path")]:
+                        if path and os.path.exists(path):
+                            os.remove(path)
+            # GPX-Dateien löschen
+            if "gpx_files" in p:
+                for gpx_path in p["gpx_files"]:
+                    if gpx_path and os.path.exists(gpx_path):
+                        os.remove(gpx_path)
         db.remove(Query().id == person_id)
         # IDs NICHT mehr neu vergeben, sondern Lücken lassen
         db.close()

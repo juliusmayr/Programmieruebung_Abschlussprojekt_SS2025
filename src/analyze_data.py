@@ -7,6 +7,7 @@ import json
 from geopy.distance import geodesic
 import plotly.graph_objects as go
 import numpy as np
+from fitparse import FitFile
 
 
 def gpx_data(uploaded_file):
@@ -121,10 +122,59 @@ def gpx_elevation_profile(uploaded_file): #window_size=10):
     return fig
 
 
-# def analyse_csv(uploaded_file):
-#     """
-#     Eine Funktiion, zu Analyse der HF und Einführen eines HF- Zonen- Diagramms.
-#     """
-#     if uploaded_file is not None:
-#         df = pd.read_csv(uploaded_file)
-        
+def fit_to_csv(fit_path, csv_path):
+    """
+    Liest eine FIT-Datei aus und speichert die Trainingsdaten als CSV.
+    :param fit_path: Pfad zur FIT-Datei
+    :param csv_path: Pfad zur zu speichernden CSV-Datei
+    """
+    fitfile = FitFile(fit_path)
+    records = []
+    for record in fitfile.get_messages('record'):
+        data = {}
+        for field in record:
+            data[field.name] = field.value
+        records.append(data)
+    if records:
+        df = pd.DataFrame(records)
+        df.to_csv(csv_path, index=False)
+        print(f"CSV gespeichert: {csv_path}")
+        print(f"Gefundene Spalten: {list(df.columns)}")
+        st.info(f"Gefundene Spalten: {list(df.columns)}")
+    else:
+        print("Keine Trainingsdaten in der FIT-Datei gefunden.")
+        st.warning("Keine Trainingsdaten in der FIT-Datei gefunden.")
+
+def plot_csv_column_over_time(csv_path, time_col="timestamp", value_col=None):
+    """
+    Plottet eine ausgewählte Spalte aus einer CSV-Datei gegen die Zeitspalte.
+    :param csv_path: Pfad zur CSV-Datei
+    :param time_col: Name der Zeitspalte (Standard: 'timestamp')
+    :param value_col: Name der zu plottenden Spalte
+    :return: Plotly Figure
+    """
+    df = pd.read_csv(csv_path)
+    if value_col is None or value_col not in df.columns or time_col not in df.columns:
+        st.warning("Bitte wähle eine gültige Zeit- und Wertspalte aus.")
+        return None
+
+    # Zeitspalte in lesbares Datumsformat umwandeln (absolute Zeit)
+    x = df[time_col]
+    if pd.api.types.is_numeric_dtype(x):
+        if x.max() > 1e12:  # Millisekunden
+            x = pd.to_datetime(x, unit='ms')
+        else:  # Sekunden
+            x = pd.to_datetime(x, unit='s')
+    elif pd.api.types.is_string_dtype(x):
+        try:
+            x = pd.to_datetime(x)
+        except Exception:
+            pass
+    fig = go.Figure(data=go.Scatter(x=x, y=df[value_col], mode='lines', name=value_col))
+    fig.update_layout(
+        title=f"{value_col} über Zeit (absolute Zeit)",
+        xaxis_title="Zeit",
+        yaxis_title=value_col,
+        height=400
+    )
+    return fig

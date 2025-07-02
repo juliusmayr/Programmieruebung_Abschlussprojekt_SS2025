@@ -16,6 +16,7 @@ with st.sidebar:
     st.title("🏃 Athlet")
     st.subheader("Willkommen im Athletenbereich!")
 
+
 if "selected" not in st.session_state:
     st.session_state.selected = "Home"
 
@@ -66,6 +67,23 @@ with col1:
         with subcol3:
             if st.session_state.selected_person != "Person auswählen":
                 if st.button(label = "🗑️", help = "Hier wird diese Person gelöscht"):
+                    # Vor dem Löschen: Verknüpfte FIT-, CSV- und GPX-Dateien entfernen
+                    fit_files = selected_person_data.get("fit_files", [])
+                    gpx_files = selected_person_data.get("gpx_files", [])
+                    import os
+                    for file_pair in fit_files:
+                        for path in [file_pair.get("fit_path"), file_pair.get("csv_path")]:
+                            if path and os.path.exists(path):
+                                try:
+                                    os.remove(path)
+                                except Exception as e:
+                                    st.warning(f"Konnte Datei {path} nicht löschen: {e}")
+                    for gpx_path in gpx_files:
+                        if gpx_path and os.path.exists(gpx_path):
+                            try:
+                                os.remove(gpx_path)
+                            except Exception as e:
+                                st.warning(f"Konnte GPX-Datei {gpx_path} nicht löschen: {e}")
                     Person.delete_person(persons_data, person.id)
                     st.success("Personendaten wurden gelöscht") 
                     st.rerun() # Neu laden der Seite um die Änderung zu sehen
