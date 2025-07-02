@@ -24,7 +24,14 @@ with col_fit:
                     athleten.append(name)
     except Exception as e:
         st.warning(f"Konnte Athletenliste nicht laden: {e}")
-    athlet = st.selectbox("Wähle den Athleten", athleten, key="athlet_select")
+    athlet_key = "athlet_select"
+    if athlet_key not in st.session_state:
+        st.session_state[athlet_key] = athleten[0]
+    athlet_index = athleten.index(st.session_state[athlet_key]) if st.session_state[athlet_key] in athleten else 0
+    selected_athlet = st.selectbox("Wähle den Athleten", athleten, index=athlet_index, key="athlet_select_box")
+    if selected_athlet != st.session_state[athlet_key]:
+        st.session_state[athlet_key] = selected_athlet
+    athlet = st.session_state[athlet_key]
     fit_file = st.file_uploader("Lade eine FIT-Datei hoch", type=["fit"], key="fit_uploader")
     st.info("Bitte lade eine FIT-Datei hoch, um sie zu speichern und zu konvertieren.")
 
@@ -45,7 +52,14 @@ with col_gpx:
             else:
                 gpx_files = []
             if gpx_files:
-                gpx_auswahl = st.selectbox("Wähle eine GPX-Datei zur Visualisierung", gpx_files, key="gpx_plot_select")
+                gpx_key = "gpx_plot_select"
+                if gpx_key not in st.session_state:
+                    st.session_state[gpx_key] = gpx_files[0] if gpx_files else None
+                gpx_index = gpx_files.index(st.session_state[gpx_key]) if st.session_state[gpx_key] in gpx_files else 0
+                selected_gpx = st.selectbox("Wähle eine GPX-Datei zur Visualisierung", gpx_files, index=gpx_index, key="gpx_plot_select_box")
+                if selected_gpx != st.session_state[gpx_key]:
+                    st.session_state[gpx_key] = selected_gpx
+                gpx_auswahl = st.session_state[gpx_key]
             else:
                 st.info("Keine GPX-Dateien für diesen Athleten vorhanden.")
         except Exception as e:
@@ -122,7 +136,14 @@ with main_col_csv:
             if fit_files:
                 st.subheader("CSV-Daten visualisieren")
                 csv_paths = [pair["csv_path"] for pair in fit_files if "csv_path" in pair]
-                csv_choice = st.selectbox("Wähle eine CSV-Datei", csv_paths, key="csv_plot_select")
+                csv_key = "csv_plot_select"
+                if csv_key not in st.session_state:
+                    st.session_state[csv_key] = csv_paths[0] if csv_paths else None
+                csv_index = csv_paths.index(st.session_state[csv_key]) if st.session_state[csv_key] in csv_paths else 0
+                selected_csv = st.selectbox("Wähle eine CSV-Datei", csv_paths, index=csv_index, key="csv_plot_select_box")
+                if selected_csv != st.session_state[csv_key]:
+                    st.session_state[csv_key] = selected_csv
+                csv_choice = st.session_state[csv_key]
                 if csv_choice:
                     import pandas as pd
                     try:
@@ -152,7 +173,14 @@ with main_col_csv:
                         else:
                             time_col = zeit_spalten[0]
                             value_cols = [col for col in df.columns if col != time_col and df[col].notna().any() and (df[col] != '').any()]
-                            value_col = st.selectbox("Wähle die zu plottende Spalte", value_cols, key="csv_value_col")
+                            value_col_key = "csv_value_col"
+                            if value_col_key not in st.session_state:
+                                st.session_state[value_col_key] = value_cols[0] if value_cols else None
+                            value_col_index = value_cols.index(st.session_state[value_col_key]) if st.session_state[value_col_key] in value_cols else 0
+                            selected_value_col = st.selectbox("Wähle die zu plottende Spalte", value_cols, index=value_col_index, key="csv_value_col_box")
+                            if selected_value_col != st.session_state[value_col_key]:
+                                st.session_state[value_col_key] = selected_value_col
+                            value_col = st.session_state[value_col_key]
                             if value_col:
                                 fig = plot_csv_column_over_time(csv_choice, time_col, value_col)
                                 if fig:

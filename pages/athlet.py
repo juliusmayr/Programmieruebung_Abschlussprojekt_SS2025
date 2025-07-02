@@ -28,8 +28,13 @@ with col1:
     # Personen laden
     persons_data = Person.load_person_data()
     list_of_persons = Person.get_person_list(persons_data)
-    
-    st.session_state.selected_person = st.selectbox("__Person auswählen__", options = ["Person auswählen"] + list_of_persons)
+    options = ["Person auswählen"] + list_of_persons
+    if "selected_person" not in st.session_state:
+        st.session_state.selected_person = "Person auswählen"
+    selected_index = options.index(st.session_state.selected_person) if st.session_state.selected_person in options else 0
+    selected = st.selectbox("__Person auswählen__", options=options, index=selected_index)
+    if selected != st.session_state.selected_person:
+        st.session_state.selected_person = selected
    
     try:
         # Laden eines Bildes 
@@ -112,7 +117,14 @@ with col2:
     selected_person = st.session_state.selected_person
     with subcol1:
         try:
-            st.session_state.selected_ekg_test = st.selectbox("__Ruhe-EKG auswählen__", options=["Bitte Wählen Sie einen Test aus"] + person.get_ekg_test_list())
+            ekg_options = ["Bitte Wählen Sie einen Test aus"] + person.get_ekg_test_list()
+            ekg_key = "selected_ekg_test"
+            if ekg_key not in st.session_state:
+                st.session_state[ekg_key] = ekg_options[0]
+            ekg_index = ekg_options.index(st.session_state[ekg_key]) if st.session_state[ekg_key] in ekg_options else 0
+            selected_ekg = st.selectbox("__Ruhe-EKG auswählen__", options=ekg_options, index=ekg_index, key="ekg_test_select_box")
+            if selected_ekg != st.session_state[ekg_key]:
+                st.session_state[ekg_key] = selected_ekg
         except:
             st.session_state.selected_ekg_test = "Bitte Wählen Sie einen Test aus" # Stellt sicher, dass nach dem Löschen der Person kein Fehler angezeigt wird
 
