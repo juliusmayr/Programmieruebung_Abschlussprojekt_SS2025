@@ -41,8 +41,14 @@ with col1:
         selected_person_data = Person.find_person_data_by_name(str(st.session_state.selected_person))
         person = Person(selected_person_data)
         person_image = selected_person_data["picture_path"]
-        image = Image.open(person_image)
-        st.image(image, caption=st.session_state.selected_person) 
+        import os
+        st.write("Bildpfad:", person_image)
+        st.write("Existiert Bilddatei?", os.path.exists(person_image))
+        try:
+            image = Image.open(person_image)
+            st.image(image, caption=st.session_state.selected_person) 
+        except Exception as e:
+            st.error(f"Fehler beim Laden des Bildes: {e}")
     
         #Laden des Alters für die augewählte Person 
         
